@@ -56,6 +56,6 @@ This project is licensed under the [CC0 1.0 Universal License](LICENSE).
 
 ---
 
-For detailed usage instructions and customization options, please refer to the [documentation](https://github.com/yourusername/mc-modpack-kit/wiki).
+<!---For detailed usage instructions and customization options, please refer to the [documentation](https://github.com/yourusername/mc-modpack-kit/wiki).-->
 
 Feel free to contribute, open issues, or suggest improvements! 🚀
