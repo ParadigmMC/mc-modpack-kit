@@ -1,0 +1,209 @@
+name: Modpack Release Pipeline
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+env:
+  MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
+  MODRINTH_ID: ${{ secrets.MODRINTH_ID }}
+  CURSEFORGE_TOKEN: ${{ secrets.CURSEFORGE_TOKEN }}
+  CURSEFORGE_ID: ${{ secrets.CURSEFORGE_ID }}
+
+
+jobs:
+  handle-release:
+    name: Handle Releases with Release Please
+    permissions:
+      contents: write
+      pull-requests: write
+    runs-on: ubuntu-latest
+    outputs:
+      releases_created: ${{ steps.release-please.outputs.releases_created }}
+      tag: ${{ steps.release-please.outputs.tag_name }}
+      upload_url: ${{ steps.release-please.outputs.upload_url }}
+    steps:
+      - name: Check Out Git Repository
+        uses: actions/checkout@v2
+
+      - name: Check for "pack.toml"
+        id: check-pack-file
+        run: |
+          if [ -f pack.toml ]; then
+            echo "file_exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "file_exists=false" >> $GITHUB_OUTPUT
+          fi
+        shell: bash
+
+      - name: Perform Release with release-please
+        id: release-please
+        if: steps.check-pack-file.outputs.file_exists == 'true'
+        uses: google-github-actions/release-please-action@v3
+        with:
+          release-type: simple
+          package-name: release-please-action
+
+  process-pack-data:
+    name: Process pack.toml Data
+    runs-on: ubuntu-latest
+    outputs:
+      loader: ${{ steps.extract-versions.outputs.loader }}
+      gameversion: ${{ steps.extract-versions.outputs.gameversion }}
+    needs:
+      - handle-release
+    if: needs.handle-release.outputs.releases_created
+    permissions:
+      contents: write
+    steps:
+      - name: Check Out Git Repository
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Check for "pack.toml"
+        id: check-pack-file
+        run: |
+          if [ -f pack.toml ]; then
+            echo "file_exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "file_exists=false" >> $GITHUB_OUTPUT
+          fi
+        shell: bash
+
+      - name: Extract LOADER and GAMEVERSION from pack.toml
+        if: steps.check-pack-file.outputs.file_exists == 'true'
+        id: extract-versions
+        run: |
+          file_contents=$(cat pack.toml)
+          if [[ $file_contents == *"fabric ="* ]]; then
+            echo "Setting variable to 'fabric'"
+            LOADER="fabric"
+          elif [[ $file_contents == *"forge ="* ]]; then
+            echo "Setting variable to 'forge'"
+            LOADER="forge"
+          elif [[ $file_contents == *"quilt ="* ]]; then
+            echo "Setting variable to 'quilt'"
+            LOADER="quilt"
+          else
+            echo "Error: No match found for loaders in pack.toml"
+            exit 1
+          fi
+
+          GAMEVERSION=$(grep -oP 'minecraft = "\K[^"]+' pack.toml)
+          echo "loader=$LOADER" >> $GITHUB_OUTPUT
+          echo "gameversion=$GAMEVERSION" >> $GITHUB_OUTPUT
+        shell: bash    
+        
+      - name: Get Latest Tag
+        if: steps.check-pack-file.outputs.file_exists == 'true'
+        id: tag
+        uses: WyriHaximus/github-action-get-previous-tag@v1
+
+      - name: Set the Same Version as release-please
+        if: steps.check-pack-file.outputs.file_exists == 'true'
+        run: 
+            sed -i 's/version = "[^"]*"/version = "${{ steps.tag.outputs.tag }}"/' pack.toml
+
+      - name: Push the Updated Version
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+            commit_message: "chore(pack): bump version to ${{ steps.tag.outputs.tag }}"
+
+  build-modpack-for-release:
+    name: Build Modpack For Release
+    runs-on: ubuntu-latest
+    needs: 
+        - handle-release
+        - process-pack-data
+    if: needs.handle-release.outputs.releases_created
+    permissions:
+      contents: write
+    steps:
+      - name: Check Out Git Repository
+        uses: actions/checkout@v2
+
+      - name: Install packwiz
+        uses: supplypike/setup-bin@v3
+        with:
+          uri: 'https://nightly.link/packwiz/packwiz/workflows/go/main/Linux%2064-bit%20x86.zip'
+          name: 'packwiz'
+          version: 'linux'
+
+      - name: Build Modpack
+        run: |
+          packwiz modrinth export
+          packwiz curseforge export
+
+      - name: Upload Modpack to GitHub Releases
+        run: |
+          gh release upload ${{ needs.handle-release.outputs.tag }} ./*.{mrpack,zip} \
+            --repo ${{ github.repository_owner }}/${{ github.event.repository.name }} \
+            --clobber
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+
+      - name: Upload Modpack Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+            name: modpack-artifacts
+            path: |
+                *.mrpack
+                *.zip 
+
+  upload-modpack:
+    name: Upload Modpack
+    runs-on: ubuntu-latest
+    needs:
+      - handle-release
+      - build-modpack-for-release
+      - process-pack-data
+    permissions:
+      contents: write
+    steps:
+      - name: Check Out Git Repository
+        uses: actions/checkout@v2
+
+      - name: Download Modpack Artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: modpack-artifacts
+          path: .
+
+      - name: Get latest release description
+        run: |
+            LATEST_DESC=$(curl -s https://api.github.com/repos/${{ github.repository }}/releases/latest | jq -r '.body')
+            echo "$LATEST_DESC" > CHANGELOG.release.md
+        shell: bash
+
+      - name: Publish to Modrinth
+        env:
+          LOADER: ${{  needs.process-pack-data.outputs.loader }}
+          GAME_VERSION: ${{ needs.process-pack-data.outputs.gameversion }}
+        if: env.MODRINTH_TOKEN != '' && env.MODRINTH_ID != ''
+        uses: Kir-Antipov/mc-publish@v3.2
+        with:
+          modrinth-id: ${{ env.MODRINTH_ID }}
+          modrinth-token: ${{ env.MODRINTH_TOKEN }}
+          loaders: ${{ env.LOADER }}
+          game-versions: ${{ env.GAME_VERSION }}
+          changelog-file: CHANGELOG.release.*
+          files: '*.mrpack'
+
+      - name: Publish to CurseForge
+        env:
+          LOADER: ${{ needs.process-pack-data.outputs.loader }}
+          GAME_VERSION: ${{ needs.process-pack-data.outputs.gameversion }}
+        if: env.CURSEFORGE_TOKEN != '' && env.CURSEFORGE_ID != ''
+        uses: Kir-Antipov/mc-publish@v3.2
+        with:
+          curseforge-id: ${{ env.CURSEFORGE_ID }}
+          curseforge-token: ${{ env.CURSEFORGE_TOKEN }}
+          loaders: ${{ env.LOADER }}
+          game-versions: ${{ env.GAME_VERSION }}
+          changelog-file: CHANGELOG.release.*
+          files: '*.zip'
