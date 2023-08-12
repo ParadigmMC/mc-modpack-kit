@@ -30,6 +30,12 @@
 
 4. **Release Please Pull Requests:**
 
+   **Repository Commit Convention**
+
+   > Note: the Release Pull Request don't generate without using [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) specification styled commits/PRs
+
+   This template and workflows follows the [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) specification for structuring its commit messages. This convention helps maintain a clear and standardized format for commit messages, making it easier to understand the purpose and impact of changes. You can enforce this on your project just by using [semantic PRs](https://github.com/apps/semantic-prs).
+
    The workflow automatically handles releases using the Release Please GitHub Action. To trigger a new release, create a pull request (PR) that updates the `CHANGELOG.md` file with the changes for the new release. Once the PR is merged into the `main` branch, the workflow will automatically generate a new release based on the PR's changes.
 
 5. **Update Workflow:**
