@@ -1,0 +1,27 @@
+on:
+  workflow_dispatch:
+
+jobs:
+  update_mods:
+    name: Update Mods
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Install Packwiz
+        uses: supplypike/setup-bin@v3
+        with:
+          uri: 'https://nightly.link/packwiz/packwiz/workflows/go/main/Linux%2064-bit%20x86.zip'
+          name: 'packwiz'
+          version: 'linux'
+
+      - name: Update Mods with Packwiz
+        run: packwiz update -a
+      
+      - name: Push the updated mod list
+        uses: stefanzweifel/git-auto-commit-action@v4
