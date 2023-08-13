@@ -26,3 +26,5 @@ jobs:
       
       - name: Push the updated mod list
         uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+            commit_message: "chore(pack): updated mods"
