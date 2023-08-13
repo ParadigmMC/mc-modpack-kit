@@ -1,3 +1,4 @@
+name: Modpack Update Mods Pipeline
 on:
   workflow_dispatch:
 
