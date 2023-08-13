@@ -22,12 +22,16 @@
 
 1. **Fork this repository:** Fork this repository to your own GitHub account.
 
-2. **Set up secrets:** In your forked repository, go to "Settings" -> "Secrets" and add the following secrets:
+2. **Set up secrets and permissions:**
+     In your forked repository, go to "Settings" -> "Secrets" and add the following secrets:
 
    - `MODRINTH_TOKEN`: Token for authenticating with Modrinth.
    - `MODRINTH_ID`: Modrinth project ID.
    - `CURSEFORGE_TOKEN`: Token for authenticating with CurseForge.
    - `CURSEFORGE_ID`: CurseForge project ID.
+  
+    For permissions in your forked repository, go to "Settings" -> "Actions" -> "General" -> Workflow permissions
+    enable "Allow GitHub Actions to create and approve pull requests"
 
 3. **Initializing your modpack:**
 
