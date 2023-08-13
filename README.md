@@ -30,8 +30,8 @@
    - `CURSEFORGE_TOKEN`: Token for authenticating with CurseForge.
    - `CURSEFORGE_ID`: CurseForge project ID.
   
-    For permissions in your forked repository, go to "Settings" -> "Actions" -> "General" -> Workflow permissions
-    enable "Allow GitHub Actions to create and approve pull requests"
+    For permissions in your forked repository, go to "Settings" -> "Actions" -> "General" -> "Workflow permissions".
+    Enable "Allow GitHub Actions to create and approve pull requests"
 
 3. **Initializing your modpack:**
 
