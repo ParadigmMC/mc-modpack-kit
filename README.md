@@ -1,4 +1,9 @@
-![Logo-Light](https://github.com/jh-devv/mc-modpack-kit/assets/122896463/003f8682-7e4f-4797-bdc8-2610a5d505de#gh-dark-mode-only)![Logo-Dark](https://github.com/jh-devv/mc-modpack-kit/assets/122896463/55e900a0-6de4-49e7-a9b0-2a8c764c9a4a#gh-light-mode-only)
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://github.com/jh-devv/mc-modpack-kit/assets/122896463/003f8682-7e4f-4797-bdc8-2610a5d505de">
+   <source media="(prefers-color-scheme: light)" srcset="https://github.com/jh-devv/mc-modpack-kit/assets/122896463/55e900a0-6de4-49e7-a9b0-2a8c764c9a4a">
+  <img alt="Logo">
+</picture>
+<br></br>
 
 [![Use this template](https://img.shields.io/badge/use%20this-template-blue?logo=github&style=for-the-badge)](https://github.com/badges/shields/generate)
 ![GitHub Actions Badge](https://img.shields.io/badge/GitHub%20Actions-2088FF?logo=githubactions&logoColor=fff&style=for-the-badge)![Minecraft Badge](https://img.shields.io/badge/Minecraft-62B47A?logo=minecraft&logoColor=fff&style=for-the-badge)
