@@ -79,6 +79,7 @@ These are some common issues with mc-modpack-kit and how to fix them
    3. You have older releases/tags on your GitHub repo, please remove them
 - The update workflow is not working?
    1. If this is the case, it maybe that the actions can't push the changes to your repo, to troubleshoot this: try to remove all of the branch security rules is possible
+- If your mod has multiple loaders or game versions it might be a problem.
 
 **If you have any more issues, please post them to [Issues](https://github.com/jh-devv/mc-modpack-kit/issues) or contact me via the detais in my GitHub profile!**
 
