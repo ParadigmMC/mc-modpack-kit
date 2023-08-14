@@ -10,6 +10,11 @@
 
 **mc-modpack-kit** is a GitHub Actions workflow template designed to streamline the release process of Minecraft modpacks. It automates tasks like version extraction, building the modpack, and publishing it to platforms like Modrinth and CurseForge.
 
+**Important**: To maintain a clear and organized version history, it is strongly recommended to follow the [Conventional Commit Messages](https://www.conventionalcommits.org/en/v1.0.0/) format for your commit messages. This format ensures consistency and enables automated versioning and changelog generation.
+
+You can read more at the ["Usage" section](#usage)
+if you have any issues, please read this before making an issue: ["Known issues"](#common-issues)
+
 ## Features
 
 - Automates the modpack release process using GitHub Actions workflows.
@@ -35,17 +40,17 @@
 
 3. **Initializing your modpack:**
 
-   - Before you start, make sure to initialize your modpack by generating a `pack.toml` file using the `packwiz` tool. You can use the following command:
-     ```
+   - Before you start, make sure to initialize your modpack by generating a `pack.toml` file using the `packwiz` tool. Install it via the instructions provided [here](https://packwiz.infra.link/installation/). You can use the following command once you have installed it on your machine:
+     ```sh
      packwiz init
      ```
 
-4. **Clear and Informative Commit Messages:**
+4. **Conventional commits:**
    - Maintain a well-documented history with [**Conventional Commit Messages**](https://www.conventionalcommits.org/en/v1.0.0/).
    - Format: `<type>(<scope>): <subject>`
      - Example: `feat(mod): add new mod`
 
-5. **Release Please Automation:**
+5. **Release Please PRs:**
    - Streamline your releases even further with Release Please.
    - Automatically generate changelogs and handle versioning by following Conventional Commits.
    - Push changes to `main`, and Release Please will create PRs with changes since the last release.
@@ -60,8 +65,22 @@
 
    To use the update workflow:
 
-   1. Enable the update workflow by uncommenting and customizing the necessary sections in `.github/workflows/update.yml`.
-   2. Trigger the update workflow manually or set up a schedule to check for updates periodically.
+   1. Trigger the update workflow manually or set up a schedule to check for updates periodically.
+
+## Common issues
+
+These are some common issues with mc-modpack-kit and how to fix them
+
+- Why isn't release pr being created?:
+   There could be multiple reasons for this, some of them include:
+   1. Workflow permissions:
+      - For permissions in your forked repository, go to "Settings" -> "Actions" -> "General" -> "Workflow permissions". Enable "Allow GitHub Actions to create and approve pull requests"
+   2. You need to use [**Conventional Commit Messages**](https://www.conventionalcommits.org/en/v1.0.0/)
+   3. You have older releases/tags on your GitHub repo, please remove them
+- The update workflow is not working?
+   1. If this is the case, it maybe that the it can't push the changes to your repo, to troubleshoot this: try to remove all of the branch security rules is possible
+
+**If you have any more issues, please post them to [Issues](https://github.com/jh-devv/mc-modpack-kit/issues) or contact me via the detais in my GitHub profile!**
 
 ## License
 
