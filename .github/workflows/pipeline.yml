@@ -18,9 +18,6 @@ jobs:
         permissions:
             contents: read
 
-        outputs:
-            continue: ${{ steps.check-template.outputs.continue }}
-
         steps:
           - name: Checkout Repository
             uses: actions/checkout@v2
@@ -30,13 +27,13 @@ jobs:
             run: |
               if [ "${{ github.repository }}" == "jh-devv/mc-modpack-kit" ]; then
                 echo "::error ::Workflow not allowed on template repository ${{ github.repository }}. Stopping..."
-                echo "continue=false" >> $GITHUB_OUTPUT
+                exit 78
               else
                 echo "::notice ::The current repo ${{ github.repository }} is not the template. Pipeline can continue 🚀"
                 exit 0
               fi
             
-          - name: Check for the ${{ env.PACK_FILE }} file
+          - name: Check for the ${{ env.PACK_FILE }} file if not template
             id: check-pack-file
             run: |
                 if [ -f ${{ env.PACK_FILE }} ]; then
@@ -44,7 +41,7 @@ jobs:
                     exit 0
                 else
                     echo "::error file=${{ env.PACK_FILE }}::Can't find ${{ env.PACK_FILE }}"
-                    echo "continue=false" >> $GITHUB_OUTPUT
+                    exit 78
                 fi
             shell: bash
 
@@ -55,8 +52,6 @@ jobs:
 
         needs: 
             check-buildable-files
-
-        if: ${{ needs.check-buildable-files.outputs.continue != 'false'}}
 
         permissions:
             contents: write
