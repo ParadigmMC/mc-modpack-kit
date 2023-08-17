@@ -1,0 +1,103 @@
+name: Publish | Workflow
+
+on:
+  workflow_dispatch:
+    inputs:
+      loader:
+        description: "Current Modpack Loader"
+        required: true
+        type: string
+      game-version:
+        description: "Current Modpack Game Version"
+        required: true
+        type: string
+  workflow_call:
+    inputs:
+      loader:
+        description: "Current Modpack Loader"
+        required: true
+        type: string
+      game-version:
+        description: "Current Modpack Game Version"
+        required: true
+        type: string
+    secrets:
+      MODRINTH_TOKEN:
+        description: "Token used to uploading modpack to Modrinth"
+      MODRINTH_ID:
+        description: "ID used to uploading modpack to Modrinth"
+      CURSEFORGE-TOKEN:
+        description: "Token used to uploading modpack to Cursrforge"
+      CURSEFORGE-ID:
+        description: "ID used to uploading modpack to Curseforge"
+
+env:
+  MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
+  MODRINTH_ID: ${{ secrets.MODRINTH_ID }}
+  CURSEFORGE_TOKEN: ${{ secrets.CURSEFORGE_TOKEN }}
+  CURSEFORGE_ID: ${{ secrets.CURSEFORGE_ID }}
+
+jobs:
+  publish:
+    name: Publish Modpack
+
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Check Out Git Repository
+        uses: actions/checkout@v2
+
+      - name: Print Environment Variables
+        run: |
+          echo "MODRINTH_TOKEN: ${{env.MODRINTH_TOKEN}}"
+          echo "MODRINTH_ID: ${{env.MODRINTH_ID}}"
+          echo "CURSEFORGE_TOKEN: ${{env.CURSEFORGE_TOKEN}}"
+          echo "CURSEFORGE_ID: ${{env.CURSEFORGE_ID}}"
+          echo "LOADER: ${{inputs.loader}}"
+          echo "GAME_VERSION: ${{inputs.game-version}}"
+
+      - name: Download the pack files
+        uses: robinraju/release-downloader@v1.8
+        id: download-files
+        with:
+          fileName: "*"
+          latest: true
+          tarBall: false
+          zipBall: false
+
+      - name: Get latest release description
+        run: |
+          LATEST_DESC=$(curl -s https://api.github.com/repos/${{ github.repository }}/releases/latest | jq -r '.body')
+          echo "$LATEST_DESC" > CHANGELOG.release.md
+        shell: bash
+
+      - name: Publish to Modrinth
+        env:
+          LOADER: ${{ inputs.loader }}
+          GAME_VERSION: ${{ inputs.game-version }}
+        if: env.MODRINTH_TOKEN != '' && env.MODRINTH_ID != ''
+        uses: Kir-Antipov/mc-publish@v3.2
+        with:
+          modrinth-id: ${{ env.MODRINTH_ID }}
+          modrinth-token: ${{ env.MODRINTH_TOKEN }}
+          loaders: ${{ env.LOADER }}
+          game-versions: ${{ env.GAME_VERSION }}
+          changelog-file: CHANGELOG.release.*
+          files: "*.mrpack"
+
+      - name: Publish to CurseForge
+        env:
+          LOADER: ${{ inputs.loader }}
+          GAME_VERSION: ${{ inputs.game-version }}
+        if: env.CURSEFORGE_TOKEN != '' && env.CURSEFORGE_ID != ''
+        uses: Kir-Antipov/mc-publish@v3.2
+        with:
+          curseforge-id: ${{ env.CURSEFORGE_ID }}
+          curseforge-token: ${{ env.CURSEFORGE_TOKEN }}
+          loaders: ${{ env.LOADER }}
+          game-versions: ${{ env.GAME_VERSION }}
+          changelog-file: CHANGELOG.release.*
+          files: "*.zip"
