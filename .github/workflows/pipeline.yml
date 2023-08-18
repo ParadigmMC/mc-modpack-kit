@@ -2,167 +2,168 @@
 name: Modpack Release | Pipeline
 
 on:
-    push:
-      branches:
-        - main
+  push:
+    branches:
+      - main
 
 env:
-    PACK_FILE: "pack.toml"
+  PACK_FILE: "pack.toml"
 
 jobs:
-    check-buildable-files:
-        name: Check for Buildable Files
-    
-        runs-on: ubuntu-latest
-    
-        outputs:
-          status-template: ${{ steps.check-template.outputs.status-template }}
-          status-pack-file: ${{ steps.check-pack-file.outputs.status-pack-file }}
-    
-        steps:
-          - name: Checkout Repository
-            uses: actions/checkout@v2
-    
-          - name: Check if template repository
-            id: check-template
-            run: |
-              if [ "${{ github.repository }}" == "jh-devv/mc-modpack-kit" ]; then
-                echo "::error ::Workflow not allowed on template repository ${{ github.repository }}. Stopping..."
-                echo "status-template=false" >> $GITHUB_OUTPUT
-              else
-                echo "::notice ::The current repo ${{ github.repository }} is not the template. Pipeline can continue 🚀"
-                echo "status-template=true" >> $GITHUB_OUTPUT
-              fi
-    
-          - name: Check for the ${{ env.PACK_FILE }} file if not template
-            id: check-pack-file
-            run: |
-              if [ -f ${{ env.PACK_FILE }} ]; then
-                echo "::notice file=${{ env.PACK_FILE }}::Found ${{ env.PACK_FILE }}. Pipeline can continue 🚀"
-                echo "status-pack-file=true" >> $GITHUB_OUTPUT
-              else
-                echo "::error file=${{ env.PACK_FILE }}::Can't find ${{ env.PACK_FILE }}"
-                echo "status-pack-file=false" >> $GITHUB_OUTPUT
-              fi
-            shell: bash
-    
-    release-please:
-        name: Handle Releases with Release Please
-    
-        runs-on: ubuntu-latest
-    
-        needs:
-          - check-buildable-files
+  check-buildable-files:
+    name: Check for Buildable Files
 
-        if: needs.check-buildable-files.outputs.status-pack-file == 'true' && needs.check-buildable-files.outputs.status-template == 'true'
-    
-        outputs:
-            releases_created: ${{ steps.release-please.outputs.releases_created }}
-            tag: ${{ steps.release-please.outputs.tag_name }}
-            upload_url: ${{ steps.release-please.outputs.upload_url }}
+    runs-on: ubuntu-latest
 
-        steps:
-          - name: Check Out Git Repository
-            uses: actions/checkout@v2
-    
-          - name: Perform Release with release-please
-            id: release-please
-            uses: google-github-actions/release-please-action@v3
-            with:
-              release-type: simple
-              package-name: release-please-action
-    config:
-        name: Get and Set Config Files
-        runs-on: ubuntu-latest
+    outputs:
+      status-template: ${{ steps.check-template.outputs.status-template }}
+      status-pack-file: ${{ steps.check-pack-file.outputs.status-pack-file }}
 
-        permissions:
-            contents: write
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
 
-        outputs:
-            loader: ${{ steps.extract-versions.outputs.loader }}
-            game-version: ${{ steps.extract-versions.outputs.game-version }}
+      - name: Check if template repository
+        id: check-template
+        run: |
+          if [ "${{ github.repository }}" == "jh-devv/mc-modpack-kit" ]; then
+            echo "::error ::Workflow not allowed on template repository ${{ github.repository }}. Stopping..."
+            echo "status-template=false" >> $GITHUB_OUTPUT
+          else
+            echo "::notice ::The current repo ${{ github.repository }} is not the template. Pipeline can continue 🚀"
+            echo "status-template=true" >> $GITHUB_OUTPUT
+          fi
 
-        needs:
-            - release-please
+      - name: Check for the ${{ env.PACK_FILE }} file if not template
+        id: check-pack-file
+        run: |
+          if [ -f ${{ env.PACK_FILE }} ]; then
+            echo "::notice file=${{ env.PACK_FILE }}::Found ${{ env.PACK_FILE }}. Pipeline can continue 🚀"
+            echo "status-pack-file=true" >> $GITHUB_OUTPUT
+          else
+            echo "::error file=${{ env.PACK_FILE }}::Can't find ${{ env.PACK_FILE }}"
+            echo "status-pack-file=false" >> $GITHUB_OUTPUT
+          fi
+        shell: bash
 
-        if: needs.release-please.outputs.releases_created
+  release-please:
+    name: Handle Releases with Release Please
 
-        steps:
-            - name: Check Out Git Repository
-              uses: actions/checkout@v2
-              with:
-                fetch-depth: 0
-        
-            - name: Extract LOADER and GAMEVERSION from ${{ env.PACK_FILE }}
-              id: extract-versions
-              run: |
-                pack_file_contents=$(cat ${{ env.PACK_FILE }})
-                loaders=("fabric" "forge" "quilt")
-                
-                LOADER=""
-              
-                for loader in "${loaders[@]}"; do
-                if [[ $pack_file_contents == *"$loader ="* ]]; then
-                  echo "::notice ::Setting LOADER to '$loader'"
-                  LOADER="$loader"
-                  break
-                fi
-                done
-              
-                if [[ -z "$LOADER" ]]; then
-                    echo "::error file=${{ env.PACK_FILE }}::No match found for loaders in ${{ env.PACK_FILE }}"
-                    exit 1
-                fi
-              
-                GAME_VERSION=$(grep -oP 'minecraft = "\K[^"]+' ${{ env.PACK_FILE }})
-                echo "loader=$LOADER" >> $GITHUB_OUTPUT
-                echo "game-version=$GAME_VERSION" >> $GITHUB_OUTPUT
-              shell: bash
+    runs-on: ubuntu-latest
 
+    needs:
+      - check-buildable-files
 
-            - name: Set the Same Version as release-please
-              run: 
-                  sed -i 's/version = "[^"]*"/version = "${{ needs.release-please.outputs.tag }}"/' pack.toml
-      
-            - name: Push the Updated Version
-              uses: stefanzweifel/git-auto-commit-action@v4
-              with:
-                  commit_message: "chore(pack): bump version to ${{ needs.release-please.outputs.tag }}"
+    permissions:
+      contents: write
+      pull-requests: write
 
-    build:
-        name: Build Modpack and Upload to GitHub
-        uses: ./.github/workflows/build.yml
+    if: needs.check-buildable-files.outputs.status-pack-file == 'true' && needs.check-buildable-files.outputs.status-template == 'true'
 
-        permissions:
-            contents: write
+    outputs:
+      releases_created: ${{ steps.release-please.outputs.releases_created }}
+      tag: ${{ steps.release-please.outputs.tag_name }}
+      upload_url: ${{ steps.release-please.outputs.upload_url }}
 
-        needs:
-            - release-please
-            - config
+    steps:
+      - name: Check Out Git Repository
+        uses: actions/checkout@v2
 
+      - name: Perform Release with release-please
+        id: release-please
+        uses: google-github-actions/release-please-action@v3
         with:
-            release-tag: ${{ needs.release-please.outputs.tag }}
+          release-type: simple
+          package-name: release-please-action
+  config:
+    name: Get and Set Config Files
+    runs-on: ubuntu-latest
 
-        if: needs.release-please.outputs.releases_created
+    permissions:
+      contents: write
 
+    outputs:
+      loader: ${{ steps.extract-versions.outputs.loader }}
+      game-version: ${{ steps.extract-versions.outputs.game-version }}
 
-    publish:
-        name: Publish Modpack To Vendors
-        uses: ./.github/workflows/publish.yml
+    needs:
+      - release-please
 
-        permissions:
-            contents: write
+    if: needs.release-please.outputs.releases_created
 
-        needs:
-            - release-please
-            - build
-            - config
-
+    steps:
+      - name: Check Out Git Repository
+        uses: actions/checkout@v2
         with:
-            loader: ${{ needs.config.outputs.loader }}
-            game-version: ${{ needs.config.outputs.game-version }}
-        secrets: 
-            MODRINTH_ID: ${{ secrets.MODRINTH_ID }}
-            MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
+          fetch-depth: 0
 
-        if: needs.release-please.outputs.releases_created
+      - name: Extract LOADER and GAMEVERSION from ${{ env.PACK_FILE }}
+        id: extract-versions
+        run: |
+          pack_file_contents=$(cat ${{ env.PACK_FILE }})
+          loaders=("fabric" "forge" "quilt")
+
+          LOADER=""
+
+          for loader in "${loaders[@]}"; do
+          if [[ $pack_file_contents == *"$loader ="* ]]; then
+            echo "::notice ::Setting LOADER to '$loader'"
+            LOADER="$loader"
+            break
+          fi
+          done
+
+          if [[ -z "$LOADER" ]]; then
+              echo "::error file=${{ env.PACK_FILE }}::No match found for loaders in ${{ env.PACK_FILE }}"
+              exit 1
+          fi
+
+          GAME_VERSION=$(grep -oP 'minecraft = "\K[^"]+' ${{ env.PACK_FILE }})
+          echo "loader=$LOADER" >> $GITHUB_OUTPUT
+          echo "game-version=$GAME_VERSION" >> $GITHUB_OUTPUT
+        shell: bash
+
+      - name: Set the Same Version as release-please
+        run: sed -i 's/version = "[^"]*"/version = "${{ needs.release-please.outputs.tag }}"/' pack.toml
+
+      - name: Push the Updated Version
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "chore(pack): bump version to ${{ needs.release-please.outputs.tag }}"
+
+  build:
+    name: Build Modpack and Upload to GitHub
+    uses: ./.github/workflows/build.yml
+
+    permissions:
+      contents: write
+
+    needs:
+      - release-please
+      - config
+
+    with:
+      release-tag: ${{ needs.release-please.outputs.tag }}
+
+    if: needs.release-please.outputs.releases_created
+
+  publish:
+    name: Publish Modpack To Vendors
+    uses: ./.github/workflows/publish.yml
+
+    permissions:
+      contents: write
+
+    needs:
+      - release-please
+      - build
+      - config
+
+    with:
+      loader: ${{ needs.config.outputs.loader }}
+      game-version: ${{ needs.config.outputs.game-version }}
+    secrets:
+      MODRINTH_ID: ${{ secrets.MODRINTH_ID }}
+      MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
+
+    if: needs.release-please.outputs.releases_created
