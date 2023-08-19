@@ -85,6 +85,8 @@ jobs:
     outputs:
       loader: ${{ steps.extract-versions.outputs.loader }}
       game-version: ${{ steps.extract-versions.outputs.game-version }}
+      modrinth: ${{ steps.set-mod-vendors.outputs.modrinth }}
+      curseforge: ${{ steps.set-mod-vendors.outputs.curseforge }}
 
     needs:
       - release-please
@@ -126,6 +128,20 @@ jobs:
       - name: Set the Same Version as release-please
         run: sed -i 's/version = "[^"]*"/version = "${{ needs.release-please.outputs.tag }}"/' pack.toml
 
+      - name: Set Mod Vendors
+        id: set-mod-vendors
+        run: |
+          if [[ ! -z "${{ secrets.CURSEFORGE_TOKEN }}" && ! -z "${{ secrets.CURSEFORGE_ID }}" ]]; then
+            echo "curseforge=true" >> $GITHUB_OUTPUT
+          else
+            echo "curseforge=false" >> $GITHUB_OUTPUT
+          fi
+          if [[ ! -z "${{ secrets.MODRINTH_TOKEN }}" && ! -z "${{ secrets.MODRINTH_ID }}" ]]; then
+            echo "modrinth=true" >>$GITHUB_OUTPUT
+             else
+            echo "modrinth=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Push the Updated Version
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
@@ -144,6 +160,8 @@ jobs:
 
     with:
       release-tag: ${{ needs.release-please.outputs.tag }}
+      build-modrinth: ${{ needs.config.outputs.modrinth }}
+      build-curse: ${{ needs.config.outputs.curseforge }}
 
     if: needs.release-please.outputs.releases_created
 
@@ -162,6 +180,8 @@ jobs:
     with:
       loader: ${{ needs.config.outputs.loader }}
       game-version: ${{ needs.config.outputs.game-version }}
+      upload-modrinth: ${{ needs.config.outputs.modrinth }}
+      upload-curse: ${{ needs.config.outputs.curseforge }}
     secrets:
       MODRINTH_ID: ${{ secrets.MODRINTH_ID }}
       MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}

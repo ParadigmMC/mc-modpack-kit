@@ -11,6 +11,14 @@ on:
         description: "Current Modpack Game Version"
         required: true
         type: string
+      upload-modrinth:
+        description: "Should the Modpack Be Uploaded to Modrinth"
+        type: string
+        required: true
+      upload-curse:
+        description: "Should the Modpack Be Uploaded to CurseForge"
+        type: string
+        required: true
   workflow_call:
     inputs:
       loader:
@@ -21,6 +29,14 @@ on:
         description: "Current Modpack Game Version"
         required: true
         type: string
+      upload-modrinth:
+        description: "Should the Modpack Be Uploaded to Modrinth"
+        type: string
+        required: true
+      upload-curse:
+        description: "Should the Modpack Be Uploaded to CurseForge"
+        type: string
+        required: true
     secrets:
       MODRINTH_TOKEN:
         description: "Token used to uploading modpack to Modrinth"
@@ -69,7 +85,7 @@ jobs:
         env:
           LOADER: ${{ inputs.loader }}
           GAME_VERSION: ${{ inputs.game-version }}
-        if: env.MODRINTH_TOKEN != '' && env.MODRINTH_ID != ''
+        if: inputs.upload-modrinth == 'true'
         uses: Kir-Antipov/mc-publish@v3.2
         with:
           modrinth-id: ${{ env.MODRINTH_ID }}
@@ -83,7 +99,7 @@ jobs:
         env:
           LOADER: ${{ inputs.loader }}
           GAME_VERSION: ${{ inputs.game-version }}
-        if: env.CURSEFORGE_TOKEN != '' && env.CURSEFORGE_ID != ''
+        if: inputs.upload-curse == 'true'
         uses: Kir-Antipov/mc-publish@v3.2
         with:
           curseforge-id: ${{ env.CURSEFORGE_ID }}
