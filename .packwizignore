@@ -4,3 +4,6 @@
 # Exclude README
 /README.md
 /README.template.md
+
+# Exclude actions
+/.github/
