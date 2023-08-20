@@ -40,6 +40,8 @@ if you have any issues, please read this before making an issue: ["Known issues"
 
 3. **Initializing your modpack:**
 
+   - The very first thing you need to do if you want to start the versioning scheme from some other than v1.0.0, you can run `.github/workflows/set-version.yml``
+
    - Before you start, make sure to initialize your modpack by generating a `pack.toml` file using the `packwiz` tool. Install it via the instructions provided [here](https://packwiz.infra.link/installation/). You can use the following command once you have installed it on your machine:
      ```sh
      packwiz init
