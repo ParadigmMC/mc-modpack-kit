@@ -1,5 +1,5 @@
 ---
-name: Feature request for ci
+name: Feature request for CI
 about: Suggest an idea for this project to use in the CI actions
 title: ''
 labels: enhancement
