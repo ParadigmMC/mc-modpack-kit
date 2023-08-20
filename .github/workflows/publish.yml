@@ -76,10 +76,16 @@ jobs:
           zipBall: false
 
       - name: Get latest release description
-        run: |
-          LATEST_DESC=$(curl -s https://api.github.com/repos/${{ github.repository }}/releases/latest | jq -r '.body')
-          echo "$LATEST_DESC" > CHANGELOG.release.md
+        id: latest-release
+        uses: pozetroninc/github-action-get-latest-release@master
+        with:
+          repository: ${{ github.repository }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Pipe latest release description to file
+        run: echo "${{ steps.latest-release.outputs.description }}" > CHANGELOG.release.md
         shell: bash
+          
 
       - name: Publish to Modrinth
         env:
