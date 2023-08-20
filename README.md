@@ -10,7 +10,7 @@
 
 **mc-modpack-kit** is a GitHub Actions workflow template designed to streamline the release process of Minecraft modpacks. It automates tasks like version extraction, building the modpack, and publishing it to platforms like Modrinth and CurseForge.
 
-**Important**: To maintain a clear and organized version history, it is strongly recommended to follow the [Conventional Commit Messages](https://www.conventionalcommits.org/en/v1.0.0/) format for your commit messages. This format ensures consistency and enables automated versioning and changelog generation.
+**Important**: To maintain a clear and organized version history, it is strongly recommended to follow the [Conventional Commit Messages](https://www.conventionalcommits.org/en/v1.0.0/) format for your commit messages. This format ensures consistency and enables automated versioning and changelog generation. So use something like `chore(modpack)` or `feat(modpack)`, these are explained in the ["Usage" section](#usage).
 
 You can read more at the ["Usage" section](#usage)
 if you have any issues, please read this before making an issue: ["Known issues"](#common-issues)
@@ -47,8 +47,11 @@ if you have any issues, please read this before making an issue: ["Known issues"
 
 4. **Conventional commits:**
    - Maintain a well-documented history with [**Conventional Commit Messages**](https://www.conventionalcommits.org/en/v1.0.0/).
+   - When you use chore (e.g. mod updates) it does not appear on the release notes
    - Format: `<type>(<scope>): <subject>`
-     - Example: `feat(mod): add new mod`
+     - Here are few examples
+       - `chore(modpack): update <mod/s>` This is used when updating mods
+       - `feat(modpack): add <mod>` This is used when adding a specific mod.
 
 5. **Release Please PRs:**
    - Streamline your releases even further with Release Please.
