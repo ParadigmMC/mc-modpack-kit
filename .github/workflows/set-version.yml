@@ -18,7 +18,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Add the version
-        run: 'git commit --allow-empty -m "chore: release ${{ inputs.version }}" -m "Release-As: ${{ inputs.version }}'
+        run: 'git commit --allow-empty -m "chore: release ${{ inputs.version }}" -m "Release-As: ${{ inputs.version }}"'
     
       - name: Push changes
         uses: ad-m/github-push-action@master
