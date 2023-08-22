@@ -1,0 +1,48 @@
+name: 'Bump Modpack Action'
+description: 'Bump a modpacks version'
+
+inputs:
+  modpack:
+    description: 'Path to the modpack directory'
+    required: false
+    default: '.'
+  pack-file:
+    description: 'Path to the pack config file'
+    required: false
+    default: 'pack.toml'
+
+outputs:
+  loader:
+    description: 'Detected mod loader'
+    value: ${{ steps.parse.outputs.loader }}
+  game-version:
+    description: 'Detected game version'
+    value: ${{ steps.parse.outputs.game-version }}
+
+runs:
+  using: 'composite'
+
+  steps:
+    - name: Check Out Git Repository
+      uses: actions/checkout@v3
+
+    - name: Parse the pack.toml
+      id: parse
+      run: |
+        loaders=("fabric" "forge" "quilt")
+        for loader in "${loaders[@]}"; do
+          if [[ $(<"${{ env.pack-file }}") == *"$loader ="* ]]; then
+            LOADER="$loader" && break
+          fi
+        done
+
+        [[ -z "$LOADER" ]] && { echo "::error file=${{ env.pack-file }}::No match found for loaders in ${{ env.pack-file }}" && exit 1; }
+
+        GAME_VERSION=$(grep -oP 'minecraft = "\K[^"]+' "${{ env.pack-file }}")
+        echo "loader=$LOADER" >> $GITHUB_ENV
+        echo "game-version=$GAME_VERSION" >> $GITHUB_ENV
+
+        echo "::notice ::⚙ The detected loader for ${{ inputs.modpack }} is $LOADER"
+        echo "::notice ::⚙ The detected game version for ${{ inputs.modpack }} is $GAME_VERSION"
+      shell: bash
+      working-directory: ${{ inputs.modpack }}
