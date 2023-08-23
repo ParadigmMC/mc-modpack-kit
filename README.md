@@ -59,7 +59,7 @@
    - Begin by running `packwiz init`, preferably within the `main` directory.
 
 4. **You are good to go!**
-   - You can now merge the release PR that release please has made, sit back and enjoy a cup of coffee! ^-^
+   - You can now merge the release PR that release please has made, sit back and enjoy a cup of coffee! ☕ ^-^
 
 ### Troubleshooting and Support
 
