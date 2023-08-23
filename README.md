@@ -1,102 +1,80 @@
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://github.com/jh-devv/mc-modpack-kit/assets/122896463/003f8682-7e4f-4797-bdc8-2610a5d505de">
-   <source media="(prefers-color-scheme: light)" srcset="https://github.com/jh-devv/mc-modpack-kit/assets/122896463/55e900a0-6de4-49e7-a9b0-2a8c764c9a4a">
-  <img alt="Logo">
-</picture>
-<br></br>
+<div align="center">
+  <img src="https://github.com/jh-devv/mc-modpack-kit/assets/122896463/003f8682-7e4f-4797-bdc8-2610a5d505de" alt="Logo">
+</div>
 
-[![Use this template](https://img.shields.io/badge/use%20this-template-blue?logo=github&style=for-the-badge)](https://github.com/badges/shields/generate)
-![GitHub Actions Badge](https://img.shields.io/badge/GitHub%20Actions-2088FF?logo=githubactions&logoColor=fff&style=for-the-badge)![Minecraft Badge](https://img.shields.io/badge/Minecraft-62B47A?logo=minecraft&logoColor=fff&style=for-the-badge)
+<p align="center">Streamline the Minecraft Modpack Release Process with GitHub Actions!</p>
 
-**mc-modpack-kit** is a GitHub Actions workflow template designed to streamline the release process of Minecraft modpacks. It automates tasks like version extraction, building the modpack, and publishing it to platforms like Modrinth and CurseForge.
+<p align="center">
+  <a href="https://github.com/badges/shields/generate">
+    <img src="https://img.shields.io/badge/use%20this-template-blue?logo=github&style=for-the-badge" alt="Use this template">
+  </a>
+  <img src="https://img.shields.io/badge/GitHub%20Actions-2088FF?logo=githubactions&logoColor=fff&style=for-the-badge" alt="GitHub Actions Badge">
+  <img src="https://img.shields.io/badge/Minecraft-62B47A?logo=minecraft&logoColor=fff&style=for-the-badge" alt="Minecraft Badge">
+</p>
 
-**Important**: To maintain a clear and organized version history, it is strongly recommended to follow the [Conventional Commit Messages](https://www.conventionalcommits.org/en/v1.0.0/) format for your commit messages. This format ensures consistency and enables automated versioning and changelog generation. So use something like `chore(modpack)` or `feat(modpack)`, these are explained in the ["Usage" section](#usage).
+---
 
-You can read more at the ["Usage" section](#usage)
-if you have any issues, please read this before making an issue: ["Known issues"](#common-issues)
+**mc-modpack-kit** is a GitHub Actions workflow template designed to simplify the release process of Minecraft modpacks using a structured monorepo approach. It automates essential tasks such as versioning, modpack building, and publishing on platforms like Modrinth and CurseForge.
 
-## Features
+### Key Features
 
-- Automates the modpack release process using GitHub Actions workflows.
-- Extracts loader type and game version information from `pack.toml` files.
-- Builds the modpack using the `packwiz` tool.
-- Publishes the modpack to Modrinth and CurseForge platforms.
-- Provides an update workflow for managing modpack updates.
+1. **Monorepo Structure**
 
-## Usage
+   Embrace the power of organization with a monorepo-style architecture. Each subdirectory represents a different modpack version or loader type, streamlining your management of multiple modpack variations within a single repository.
 
-1. **Fork this repository:** Fork this repository to your own GitHub account.
+   Example subdirectories:
+   - `fabric/`: Fabric loader version.
+   - `forge/`: Forge loader version.
 
-2. **Set up secrets and permissions:**
-     In your forked repository, go to "Settings" -> "Secrets" and add the following secrets:
+   You can create more just by initializing packwiz in the said directory of your choosing.
 
-   - `MODRINTH_TOKEN`: Token for authenticating with Modrinth.
-   - `MODRINTH_ID`: Modrinth project ID.
-   - `CURSEFORGE_TOKEN`: Token for authenticating with CurseForge.
-   - `CURSEFORGE_ID`: CurseForge project ID.
-  
-    For permissions in your forked repository, go to "Settings" -> "Actions" -> "General" -> "Workflow permissions".
-    Enable "Allow GitHub Actions to create and approve pull requests"
+2. **Automated Releases**
 
-3. **Initializing your modpack:**
+   Experience effortless version control with Release Please, which generates changelogs and handles version releases automatically, in sync with your pull requests. Maintain clarity with Conventional Commit Messages.
 
-   - The very first thing you need to do if you want to start the versioning scheme from some other than v1.0.0, you can run `.github/workflows/set-version.yml``
+   Examples:
+   - `chore(<modpack dir>): update <mod>` for mod updates.
+   - `feat(<modpack dir>): add <mod>` for adding a mod.
 
-   - Before you start, make sure to initialize your modpack by generating a `pack.toml` file using the `packwiz` tool. Install it via the instructions provided [here](https://packwiz.infra.link/installation/). You can use the following command once you have installed it on your machine:
-     ```sh
-     packwiz init
-     ```
+3. **Mod Updates**
 
-4. **Conventional commits:**
-   - Maintain a well-documented history with [**Conventional Commit Messages**](https://www.conventionalcommits.org/en/v1.0.0/).
-   - When you use chore (e.g. mod updates) it does not appear on the release notes
-   - Format: `<type>(<scope>): <subject>`
-     - Here are few examples
-       - `chore(modpack): update <mod/s>` This is used when updating mods
-       - `feat(modpack): add <mod>` This is used when adding a specific mod.
+   Update your mods effortlessly by utilizing the `update.yml` workflow located in `.github/workflows/update.yml`. This action efficiently updates all mods across all subdirectories.
 
-5. **Release Please PRs:**
-   - Streamline your releases even further with Release Please.
-   - Automatically generate changelogs and handle versioning by following Conventional Commits.
-   - Push changes to `main`, and Release Please will create PRs with changes since the last release.
-   - Merge PRs for new versions, and Release Please will manage versioning and changelogs.
+### Getting Started
 
-6. **Update Workflow:**
+1. **Fork the Repository**
 
-   The project also includes an update workflow that helps you manage modpack updates more efficiently:
+   Start by forking this repository to your GitHub account.
 
-   - **Workflow:** `.github/workflows/update.yml`
-   - **Description:** Automatically updates the modpack by checking for changes in the `pack.toml` file.
+2. **Set Up Secrets and Permissions**
 
-   To use the update workflow:
+   - Navigate to "Settings" -> "Secrets" and add the following secrets:
+     - `MODRINTH_TOKEN`, `MODRINTH_ID` for Modrinth authentication.
+     - `CURSEFORGE_TOKEN`, `CURSEFORGE_ID` for CurseForge authentication.
+   - Enable "Allow GitHub Actions to create and approve pull requests" under "Settings" -> "Actions" -> "General" -> "Workflow permissions".
 
-   1. Trigger the update workflow manually or set up a schedule to check for updates periodically.
+3. **Initialize Your Modpack**
 
-## Common issues
+   - Generate a `pack.toml` file using `packwiz` (installation instructions [here](https://packwiz.infra.link/installation/)) within a modpack folder.
+   - Begin by running `packwiz init`, preferably within the `main` directory.
 
-These are some common issues with mc-modpack-kit and how to fix them
+4. **You are good to go!**
+   - You can now merge the release PR that release please has made, sit back and enjoy a cup of coffee! ^-^
 
-- Why isn't release pr being created?:
-   There could be multiple reasons for this, some of them include:
-   1. Workflow permissions:
-      - For permissions in your forked repository, go to "Settings" -> "Actions" -> "General" -> "Workflow permissions". Enable "Allow GitHub Actions to create and approve pull requests"
-   2. You need to use [**Conventional Commit Messages**](https://www.conventionalcommits.org/en/v1.0.0/)
-   3. You have older releases/tags on your GitHub repo, please remove them
+### Troubleshooting and Support
 
-**If you have any more issues, please post them to [Issues](https://github.com/jh-devv/mc-modpack-kit/issues) or contact me via the detais in my GitHub profile!**
+If you encounter any issues or need assistance, consult the [Issues](https://github.com/jh-devv/mc-modpack-kit/issues) page or reach out via my GitHub profile.
 
-## License
+### License
 
 This project is licensed under the [CC0 1.0 Universal License](LICENSE).
 
-## Acknowledgments
+### Acknowledgments
 
-- This project utilizes various GitHub Actions and tools for automating the modpack release process.
-- Big thanks ❤️ for [Rafii](https://github.com/Rafii2198) for helping to set this up!
+- This project makes effective use of GitHub Actions and various tools to automate the modpack release process.
+- A heartfelt ❤️ thank you to [Rafii](https://github.com/Rafii2198) for helping with this!
 - Special thanks to the GitHub community for their contributions and support.
 
 ---
 
-<!---For detailed usage instructions and customization options, please refer to the [documentation](https://github.com/yourusername/mc-modpack-kit/wiki).-->
-
-Feel free to contribute, open issues, or suggest improvements! 🚀
+Contributions, feedback, and improvements are warmly welcomed! Let's propel this project forward together! 🚀
