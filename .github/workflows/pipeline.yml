@@ -1,4 +1,3 @@
-# This main workflow "pipeline" handles the building, releasing the modpack, and pushing to mod platforms
 name: Modpack Release | Pipeline
 
 on:
@@ -7,183 +6,148 @@ on:
       - main
 
 env:
-  PACK_FILE: "pack.toml"
+  pack-file: 'pack.toml'
+  default-release-modrinth: 'true'
+  default-release-curseforge: 'false'
+
 
 jobs:
-  check-buildable-files:
-    name: Check for Buildable Files
+
+  parse-current-modpacks:
+    name: Parse current modpacks to a list
 
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
 
     outputs:
-      status-template: ${{ steps.check-template.outputs.status-template }}
-      status-pack-file: ${{ steps.check-pack-file.outputs.status-pack-file }}
-
+      modpack_folders: ${{ steps.list_modpacks.outputs.modpack_folders }}
+    
     steps:
-      - name: Checkout Repository
+
+      - name: Check Out Git Repository
         uses: actions/checkout@v2
 
-      - name: Check if template repository
-        id: check-template
-        run: |
-          if [ "${{ github.repository }}" == "jh-devv/mc-modpack-kit" ]; then
-            echo "::error ::Workflow not allowed on template repository ${{ github.repository }}. Stopping..."
-            echo "status-template=false" >> $GITHUB_OUTPUT
-          else
-            echo "::notice ::The current repo ${{ github.repository }} is not the template. Pipeline can continue 🚀"
-            echo "status-template=true" >> $GITHUB_OUTPUT
-          fi
 
-      - name: Check for the ${{ env.PACK_FILE }} file if not template
-        id: check-pack-file
+      - name: List Modpacks
+        id: list_modpacks
         run: |
-          if [ -f ${{ env.PACK_FILE }} ]; then
-            echo "::notice file=${{ env.PACK_FILE }}::Found ${{ env.PACK_FILE }}. Pipeline can continue 🚀"
-            echo "status-pack-file=true" >> $GITHUB_OUTPUT
-          else
-            echo "::error file=${{ env.PACK_FILE }}::Can't find ${{ env.PACK_FILE }}"
-            echo "status-pack-file=false" >> $GITHUB_OUTPUT
-          fi
-        shell: bash
+          modpackFolders=()
+          for folder in *; do
+            if [ -d "$folder" ]; then
+              if [ -e "$folder/pack.toml" ]; then
+                modpackFolders+=("$folder")
+              fi
+            fi
+          done
+          
+          echo "modpack_folders=$(jq --compact-output --null-input '$ARGS.positional' --args -- "${modpackFolders[@]}")" >> "$GITHUB_OUTPUT"
+
+      - name: Current detected modpacks
+        run: |
+          echo "::notice ::⚙ Current detected modpacks: ${{ steps.list_modpacks.outputs.modpack_folders }}"
 
   release-please:
-    name: Handle Releases with Release Please
+
+    needs:
+      - parse-current-modpacks
+  
+    if: ${{ (needs.parse-current-modpacks.outputs.modpack_folders) != '[]' }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        modpack: ${{ fromJson(needs.parse-current-modpacks.outputs.modpack_folders) }}
+
+    name: Handle Releases
 
     runs-on: ubuntu-latest
 
-    needs:
-      - check-buildable-files
+    defaults:
+      run:
+        working-directory: ${{ matrix.modpack }}
 
     permissions:
       contents: write
       pull-requests: write
 
-    if: needs.check-buildable-files.outputs.status-pack-file == 'true' && needs.check-buildable-files.outputs.status-template == 'true'
 
-    outputs:
-      releases_created: ${{ steps.release-please.outputs.releases_created }}
-      tag: ${{ steps.release-please.outputs.tag_name }}
-      upload_url: ${{ steps.release-please.outputs.upload_url }}
+    steps:      
 
-    steps:
-      - name: Check Out Git Repository
-        uses: actions/checkout@v2
+      # --- Release please
 
-      - name: Perform Release with release-please
+      - name: Perform Release with Release Please
         id: release-please
         uses: google-github-actions/release-please-action@v3
         with:
+          monorepo-tags: true
+          path: ${{ matrix.modpack }}
           release-type: simple
-          package-name: release-please-action
-  config:
-    name: Get and Set Config Files
-    runs-on: ubuntu-latest
+          package-name: ${{ matrix.modpack }}
 
-    permissions:
-      contents: write
-
-    outputs:
-      loader: ${{ steps.extract-versions.outputs.loader }}
-      game-version: ${{ steps.extract-versions.outputs.game-version }}
-      modrinth: ${{ steps.set-mod-vendors.outputs.modrinth }}
-      curseforge: ${{ steps.set-mod-vendors.outputs.curseforge }}
-
-    needs:
-      - release-please
-
-    if: needs.release-please.outputs.releases_created
-
-    steps:
       - name: Check Out Git Repository
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
-      - name: Extract LOADER and GAMEVERSION from ${{ env.PACK_FILE }}
-        id: extract-versions
-        run: |
-          pack_file_contents=$(cat ${{ env.PACK_FILE }})
-          loaders=("fabric" "forge" "quilt")
 
-          LOADER=""
+      # --- Bump pack.toml version
+      # Get Latest tag
+      # TODO: Change to release please tag
+      - name: Get Latest tag
+        id: tag
+        uses: WyriHaximus/github-action-get-previous-tag@v1
+        if: ${{ steps.release-please.outputs.releases_created }}
 
-          for loader in "${loaders[@]}"; do
-          if [[ $pack_file_contents == *"$loader ="* ]]; then
-            echo "::notice ::Setting LOADER to '$loader'"
-            LOADER="$loader"
-            break
-          fi
-          done
+      - name: Bump version
+        uses: ./.github/actions/bump
+        with:
+          release-tag: ${{ steps.tag.outputs.tag }}
+          modpack: ${{ matrix.modpack }}
+        if: ${{ steps.release-please.outputs.releases_created }}
 
-          if [[ -z "$LOADER" ]]; then
-              echo "::error file=${{ env.PACK_FILE }}::No match found for loaders in ${{ env.PACK_FILE }}"
-              exit 1
-          fi
 
-          GAME_VERSION=$(grep -oP 'minecraft = "\K[^"]+' ${{ env.PACK_FILE }})
-          echo "loader=$LOADER" >> $GITHUB_OUTPUT
-          echo "game-version=$GAME_VERSION" >> $GITHUB_OUTPUT
-        shell: bash
+      # --- Handle the configs
 
-      - name: Set the Same Version as release-please
-        run: sed -i 's/version = "[^"]*"/version = "${{ needs.release-please.outputs.tag }}"/' pack.toml
+      - name: Parse pack file
+        id: parse
+        uses: ./.github/actions/parse
+        with:
+          modpack: ${{ matrix.modpack }}
+        if: ${{ steps.release-please.outputs.releases_created }}
 
-      - name: Set Mod Vendors
+      - name: Set mod vendors
         id: set-mod-vendors
         run: |
-          if [[ ! -z "${{ secrets.CURSEFORGE_TOKEN }}" && ! -z "${{ secrets.CURSEFORGE_ID }}" ]]; then
-            echo "curseforge=true" >> $GITHUB_OUTPUT
-          else
-            echo "curseforge=false" >> $GITHUB_OUTPUT
-          fi
-          if [[ ! -z "${{ secrets.MODRINTH_TOKEN }}" && ! -z "${{ secrets.MODRINTH_ID }}" ]]; then
-            echo "modrinth=true" >>$GITHUB_OUTPUT
-             else
-            echo "modrinth=false" >> $GITHUB_OUTPUT
-          fi
+          [[ ! -z "${{ secrets.CURSEFORGE_TOKEN }}" && ! -z "${{ secrets.CURSEFORGE_ID }}" ]] && echo "curseforge=true" >> $GITHUB_OUTPUT || echo "curseforge=false" >> $GITHUB_OUTPUT
+          [[ ! -z "${{ secrets.MODRINTH_TOKEN }}" && ! -z "${{ secrets.MODRINTH_ID }}" ]] && echo "modrinth=true" >> $GITHUB_OUTPUT || echo "modrinth=false" >> $GITHUB_OUTPUT
+        shell: bash
+        if: ${{ steps.release-please.outputs.releases_created }}
 
-      - name: Push the Updated Version
-        uses: stefanzweifel/git-auto-commit-action@v4
+
+      # --- Build an release
+
+      - name: Build modpack
+        uses: ./.github/actions/build
         with:
-          commit_message: "chore(pack): bump version to ${{ needs.release-please.outputs.tag }}"
+          modpack: ${{ matrix.modpack }}
+          release-tag: ${{ steps.tag.outputs.tag }}
+          build-modrinth: ${{ env.default-release-modrinth }}
+          build-curse: ${{ env.default-release-curseforge }}
+        if: ${{ steps.release-please.outputs.releases_created }}
 
-  build:
-    name: Build Modpack and Upload to GitHub
-    uses: ./.github/workflows/build.yml
-
-    permissions:
-      contents: write
-
-    needs:
-      - release-please
-      - config
-
-    with:
-      release-tag: ${{ needs.release-please.outputs.tag }}
-      build-modrinth: ${{ needs.config.outputs.modrinth }}
-      build-curse: ${{ needs.config.outputs.curseforge }}
-
-    if: needs.release-please.outputs.releases_created
-
-  publish:
-    name: Publish Modpack To Vendors
-    uses: ./.github/workflows/publish.yml
-
-    permissions:
-      contents: write
-
-    needs:
-      - release-please
-      - build
-      - config
-
-    with:
-      loader: ${{ needs.config.outputs.loader }}
-      game-version: ${{ needs.config.outputs.game-version }}
-      upload-modrinth: ${{ needs.config.outputs.modrinth }}
-      upload-curse: ${{ needs.config.outputs.curseforge }}
-    secrets:
-      MODRINTH_ID: ${{ secrets.MODRINTH_ID }}
-      MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
-
-    if: needs.release-please.outputs.releases_created
+      - name: Release modpack to vendors
+        uses: ./.github/actions/release
+        with:
+          modpack: ${{ matrix.modpack }}
+          loader: ${{ steps.parse.outputs.loader }}
+          game-version: ${{ steps.parse.outputs.game-version }}
+          upload-modrinth: ${{ steps.set-mod-vendors.outputs.modrinth }}
+          upload-curse: ${{ steps.set-mod-vendors.outputs.curseforge }}
+          MODRINTH_ID: ${{ secrets.MODRINTH_ID }}
+          MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
+        if: |
+          steps.release-please.outputs.releases_created &&
+          (steps.set-mod-vendors.outputs.modrinth || steps.set-mod-vendors.outputs.curseforge)

@@ -1,0 +1,102 @@
+name: 'Release Modpack Action From Release'
+description: 'This automatically downloads the newest release and description and uploads it to vendors!'
+inputs:
+  loader:
+    description: "Current Modpack Loader"
+    required: true
+  game-version:
+    description: "Current Modpack Game Version"
+    required: true
+  upload-modrinth:
+    description: "Should the Modpack Be Uploaded to Modrinth"
+    required: true
+  upload-curse:
+    description: "Should the Modpack Be Uploaded to CurseForge"
+    required: true
+
+  MODRINTH_TOKEN:
+    required: false
+    description: "Token used to uploading modpack to Modrinth"
+  MODRINTH_ID:
+    required: false
+    description: "ID used to uploading modpack to Modrinth"
+  CURSEFORGE-TOKEN:
+    required: false
+    description: "Token used to uploading modpack to Curseforge"
+  CURSEFORGE-ID:
+    required: false
+    description: "ID used to uploading modpack to Curseforge"
+
+  modpack:
+    description: "Modpack directory"
+    required: false
+    default: .
+
+
+runs:
+    using: "composite"
+    steps:
+      - name: Check Out Git Repository
+        uses: actions/checkout@v3
+
+      - name: Download the pack files
+        uses: robinraju/release-downloader@v1.8
+        id: download-files
+        with:
+          fileName: "*"
+          latest: true
+          tarBall: false
+          zipBall: false
+
+      - name: Get latest release description
+        id: latest-release
+        uses: pozetroninc/github-action-get-latest-release@master
+        with:
+          repository: ${{ github.repository }}
+          token: ${{ github.token }}
+
+      - name: Pipe latest release description to file
+        run: echo "${{ steps.latest-release.outputs.description }}" > CHANGELOG.release.md
+        shell: bash
+
+      - name: Print status
+        run: |
+          echo "::notice ::⚙ Assets from latest release ${{ steps.latest-release.outputs.release }} downloaded successfully!"
+          echo "::notice ::⚙ Latest release ${{ steps.latest-release.outputs.release }} description piped into a file successfully!"
+        shell: bash
+        
+      - name: Publish to Modrinth
+        id: modrinth
+        if: inputs.upload-modrinth == 'true'
+        uses: Kir-Antipov/mc-publish@v3.2
+        with:
+          modrinth-id: ${{ inputs.MODRINTH_ID }}
+          modrinth-token: ${{ inputs.MODRINTH_TOKEN }}
+          loaders: ${{ env.loader }}
+          game-versions: ${{ env.game-version }}
+          changelog-file: CHANGELOG.release.*
+          files: "*.mrpack"
+
+      - name: Print Modrinth upload status
+        if: steps.modrinth.outcome == 'success'
+        run: |
+          echo "::notice ::☀ Modpack ${{ inputs.modpack }} has been uploaded to Modrinth with ${{ inputs.MODRINTH_ID }}"
+        shell: bash
+
+      - name: Publish to CurseForge
+        id: curseforge
+        if: inputs.upload-curse == 'true'
+        uses: Kir-Antipov/mc-publish@v3.2
+        with:
+          curseforge-id: ${{ inputs.CURSEFORGE_ID }}
+          curseforge-token: ${{ inputs.CURSEFORGE_TOKEN }}
+          loaders: ${{ env.loader }}
+          game-versions: ${{ env.game-version }}
+          changelog-file: CHANGELOG.release.*
+          files: "*.zip"
+
+      - name: Print Curseforge upload status
+        if: steps.curseforge.outcome == 'success'
+        run: |
+          echo "::notice ::☀ Modpack ${{ inputs.modpack }} has been uploaded to Curseforge with ${{ inputs.CURSEFORGE_ID }}"
+        shell: bash
