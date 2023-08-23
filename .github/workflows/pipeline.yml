@@ -7,7 +7,8 @@ on:
 
 env:
   pack-file: 'pack.toml'
-  default_release_type: 'modrinth'
+  default-release-modrinth: 'true'
+  default-release-curseforge: 'false'
 
 
 jobs:
@@ -122,7 +123,6 @@ jobs:
         run: |
           [[ ! -z "${{ secrets.CURSEFORGE_TOKEN }}" && ! -z "${{ secrets.CURSEFORGE_ID }}" ]] && echo "curseforge=true" >> $GITHUB_OUTPUT || echo "curseforge=false" >> $GITHUB_OUTPUT
           [[ ! -z "${{ secrets.MODRINTH_TOKEN }}" && ! -z "${{ secrets.MODRINTH_ID }}" ]] && echo "modrinth=true" >> $GITHUB_OUTPUT || echo "modrinth=false" >> $GITHUB_OUTPUT
-          [[ "${{ env.default_release_type }}" == "modrinth" ]] && echo 'modrinth=true' >> $GITHUB_OUTPUT || echo 'curseforge=true' >> $GITHUB_OUTPUT
         shell: bash
         if: ${{ steps.release-please.outputs.releases_created }}
 
@@ -134,19 +134,20 @@ jobs:
         with:
           modpack: ${{ matrix.modpack }}
           release-tag: ${{ steps.tag.outputs.tag }}
-          build-modrinth: ${{ steps.set-mod-vendors.outputs.modrinth }}
-          build-curse: ${{ steps.set-mod-vendors.outputs.curseforge }}
+          build-modrinth: ${{ env.default-release-modrinth }}
+          build-curse: ${{ env.default-release-curseforge }}
         if: ${{ steps.release-please.outputs.releases_created }}
 
-      - name: Publish modpack
-        uses: ./.github/actions/publish
+      - name: Release modpack to vendors
+        uses: ./.github/actions/release
         with:
+          modpack: ${{ matrix.modpack }}
           loader: ${{ steps.parse.outputs.loader }}
           game-version: ${{ steps.parse.outputs.game-version }}
-          upload-modrinth: ${{ steps.parse.outputs.modrinth }}
-          upload-curse: ${{ steps.parse.outputs.curseforge }}
+          upload-modrinth: ${{ steps.set-mod-vendors.outputs.modrinth }}
+          upload-curse: ${{ steps.set-mod-vendors.outputs.curseforge }}
           MODRINTH_ID: ${{ secrets.MODRINTH_ID }}
           MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
         if: |
           steps.release-please.outputs.releases_created &&
-          (steps.parse.outputs.modrinth == 'true' || steps.parse.outputs.curseforge == 'true')
+          (steps.set-mod-vendors.outputs.modrinth || steps.set-mod-vendors.outputs.curseforge)
