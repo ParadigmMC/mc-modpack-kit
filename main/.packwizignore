@@ -5,5 +5,5 @@
 /README.md
 /README.template.md
 
-# Exclude actions
-/.github/
+# Exclude Changelog
+/CHANGELOG.release.md
