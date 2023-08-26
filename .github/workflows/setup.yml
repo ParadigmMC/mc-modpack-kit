@@ -6,6 +6,9 @@ on:
 jobs:
   initial-version:
 
+    permissions:
+      contents: write
+
     if: github.event.ref == github.event.master_branch
     uses: ./.github/workflows/bump-version-release.yml
     with:
