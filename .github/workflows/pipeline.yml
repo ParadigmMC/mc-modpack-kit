@@ -86,6 +86,7 @@ jobs:
           path: ${{ matrix.modpack }}
           release-type: simple
           package-name: ${{ matrix.modpack }}
+          prerelease: true
 
       - name: Check Out Git Repository
         uses: actions/checkout@v3
