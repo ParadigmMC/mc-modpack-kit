@@ -17,7 +17,8 @@ on:
     inputs:
       release-tag:
         description: 'The release tag to bump the releases to'
-        required: true
+        required: false
+        default: '1.0.0'
         type: string
       modpack:
         description: 'Path to the modpack directory'
