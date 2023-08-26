@@ -3,13 +3,10 @@ name: Setup repository
 on:
   create
 
-env:
-  VERSION: 0.1.0
-
 jobs:
   initial-version:
 
     if: github.event.ref == github.event.master_branch
     uses: ./.github/workflows/bump-version-release.yml
     with:
-      release-tag: ${{ env.VERSION }}
+      release-tag: 0.1.0
