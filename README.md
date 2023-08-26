@@ -57,8 +57,12 @@
 
    - Generate a `pack.toml` file using `packwiz` (installation instructions [here](https://packwiz.infra.link/installation/)) within a modpack folder.
    - Begin by running `packwiz init`, preferably within the `main` directory.
+  
+4. **Set a release channel**
+   - By default this template uses the `beta (0.1.0)` channel, you can switch it to `release (1.0.0)` when you are ready!
+   - This can be done via executing `.github/workflows/bump-version-release.yml`!
 
-4. **You are good to go!**
+5. **You are good to go!**
    - You can now merge the release PR that release please has made, sit back and enjoy a cup of coffee! ☕ ^-^
 
 ### Troubleshooting and Support
