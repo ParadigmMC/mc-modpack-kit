@@ -103,7 +103,7 @@ jobs:
         if: ${{ steps.release-please.outputs.releases_created }}
 
       - name: Bump version
-        uses: ./.github/actions/bump
+        uses: ./.github/actions/bump-version-pack
         with:
           release-tag: ${{ steps.tag.outputs.tag }}
           modpack: ${{ matrix.modpack }}
