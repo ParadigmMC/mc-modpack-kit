@@ -1,4 +1,4 @@
-name: 'Release Modpac From A Release | Action'
+name: 'Release Modpack From A Release | Action'
 description: 'This automatically downloads the newest release and description and uploads it to vendors!'
 inputs:
   loader:
@@ -39,30 +39,48 @@ runs:
       - name: Check Out Git Repository
         uses: actions/checkout@v3
 
+      - name: Get Latest tag
+        id: tag
+        uses: WyriHaximus/github-action-get-previous-tag@v1
+
       - name: Download the pack files
         uses: robinraju/release-downloader@v1.8
         id: download-files
         with:
           fileName: "*"
-          latest: true
+          tag: ${{ steps.tag.outputs.tag }}
           tarBall: false
           zipBall: false
 
+      
       - name: Get latest release description
+        uses: cardinalby/git-get-release-action@v1
         id: latest-release
-        uses: pozetroninc/github-action-get-latest-release@master
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         with:
-          repository: ${{ github.repository }}
-          token: ${{ github.token }}
+          tag: ${{ steps.tag.outputs.tag }}
+
+      - name: Set publish version-type
+        id: release-type
+        run: |
+          if [ "${{ steps.latest-release.outputs.prerelease }}" = "true" ]; then
+            echo "Setting release-type to beta"
+            echo "release-type=beta" >> $GITHUB_OUTPUT
+          else
+            echo "Setting release-type to release"
+            echo "release-type=release" >> $GITHUB_OUTPUT
+          fi
+        shell: bash
 
       - name: Pipe latest release description to file
-        run: echo "${{ steps.latest-release.outputs.description }}" > CHANGELOG.release.md
+        run: echo "${{ steps.latest-release.outputs.body }}" > CHANGELOG.release.md
         shell: bash
 
       - name: Print status
         run: |
-          echo "::notice ::⚙ Assets from latest release ${{ steps.latest-release.outputs.release }} downloaded successfully!"
-          echo "::notice ::⚙ Latest release ${{ steps.latest-release.outputs.release }} description piped into a file successfully!"
+          echo "::notice ::⚙ Assets from latest release ${{ steps.latest-release.outputs.tag_name }} downloaded successfully!"
+          echo "::notice ::⚙ Latest release ${{ steps.latest-release.outputs.tag_name }} description piped into a file successfully!"
         shell: bash
         
       - name: Publish to Modrinth
@@ -76,6 +94,7 @@ runs:
           game-versions: ${{ env.game-version }}
           changelog-file: CHANGELOG.release.*
           files: "*.mrpack"
+          version-type: ${{ steps.release-type.outputs.release-type }}
 
       - name: Print Modrinth upload status
         if: steps.modrinth.outcome == 'success'
@@ -94,6 +113,7 @@ runs:
           game-versions: ${{ env.game-version }}
           changelog-file: CHANGELOG.release.*
           files: "*.zip"
+          version-type: ${{ steps.release-type.outputs.release-type }}
 
       - name: Print Curseforge upload status
         if: steps.curseforge.outcome == 'success'

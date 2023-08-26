@@ -1,0 +1,54 @@
+name: 'Bump Release Please Version | Pipeline'
+
+on:
+  workflow_dispatch:
+    inputs:
+      release-tag:
+        description: 'The release tag to bump the releases to'
+        required: false
+        default: '1.0.0'
+        type: string
+      modpack:
+        description: 'Path to the modpack directory'
+        required: false
+        default: 'main'
+        type: string
+  workflow_call:
+    inputs:
+      release-tag:
+        description: 'The release tag to bump the releases to'
+        required: true
+        type: string
+      modpack:
+        description: 'Path to the modpack directory'
+        required: false
+        default: 'main'
+        type: string
+
+
+jobs:
+  set-version:
+    runs-on: ubuntu-latest
+
+    name: Update Version
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Check Out Git Repository
+        uses: actions/checkout@v3
+
+      - name: Set the New Version
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_options: '--allow-empty'
+          skip_dirty_check: true
+          commit_message: |
+            chore(${{ inputs.modpack }}): release ${{ inputs.release-tag }}
+            Release-As: ${{ inputs.release-tag }}}
+
+      - name: Print the Warning
+        run: |
+          echo "::warning ::⚠ The current release PR will update next push due to the GitHub Actions Token limitations!"
+        shell: bash
