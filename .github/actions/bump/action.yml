@@ -1,4 +1,4 @@
-name: 'Bump Modpack Action'
+name: 'Bump Modpack Action | Action'
 description: 'Bump a modpacks version'
 
 inputs:

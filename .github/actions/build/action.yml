@@ -1,4 +1,4 @@
-name: 'Build Modpack Action'
+name: 'Build Modpack Action | Action'
 description: 'Uses packwiz to build the modpack!'
 inputs:
   release-tag:

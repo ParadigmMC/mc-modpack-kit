@@ -1,5 +1,5 @@
-name: 'Bump Modpack Action'
-description: 'Bump a modpacks version'
+name: 'Parse Modpack | Action'
+description: 'Parses a modpacks pack file'
 
 inputs:
   modpack:

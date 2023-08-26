@@ -1,4 +1,4 @@
-name: 'Release Modpack Action From Release'
+name: 'Release Modpac From A Release | Action'
 description: 'This automatically downloads the newest release and description and uploads it to vendors!'
 inputs:
   loader:
