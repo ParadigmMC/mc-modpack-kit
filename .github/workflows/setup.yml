@@ -1,10 +1,12 @@
-name: Setup repository
+name: Setup repository | Workflow
 
 on:
   create
 
 jobs:
   initial-version:
+
+    name: Set Inital Version
 
     permissions:
       contents: write
