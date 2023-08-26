@@ -1,4 +1,4 @@
-name: 'Release Modpac From A Release | Action'
+name: 'Release Modpack From A Release | Action'
 description: 'This automatically downloads the newest release and description and uploads it to vendors!'
 inputs:
   loader:
@@ -39,12 +39,16 @@ runs:
       - name: Check Out Git Repository
         uses: actions/checkout@v3
 
+      - name: Get Latest tag
+        id: tag
+        uses: WyriHaximus/github-action-get-previous-tag@v1
+
       - name: Download the pack files
         uses: robinraju/release-downloader@v1.8
         id: download-files
         with:
           fileName: "*"
-          latest: true
+          tag: ${{ steps.tag.outputs.tag }}
           tarBall: false
           zipBall: false
 
@@ -55,7 +59,7 @@ runs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
         with:
-          latest: true
+          tag: ${{ steps.tag.outputs.tag }}
 
       - name: Set publish version-type
         id: release-type
@@ -90,7 +94,7 @@ runs:
           game-versions: ${{ env.game-version }}
           changelog-file: CHANGELOG.release.*
           files: "*.mrpack"
-          release-type: ${{ steps.release-type.outputs.release-type }}
+          version-type: ${{ steps.release-type.outputs.release-type }}
 
       - name: Print Modrinth upload status
         if: steps.modrinth.outcome == 'success'
@@ -109,7 +113,7 @@ runs:
           game-versions: ${{ env.game-version }}
           changelog-file: CHANGELOG.release.*
           files: "*.zip"
-          release-type: ${{ steps.release-type.outputs.release-type }}
+          version-type: ${{ steps.release-type.outputs.release-type }}
 
       - name: Print Curseforge upload status
         if: steps.curseforge.outcome == 'success'
