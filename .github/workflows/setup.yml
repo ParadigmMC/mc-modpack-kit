@@ -4,6 +4,21 @@ on:
   create
 
 jobs:
+  disable-workflow:
+    name: Disable this Workflow
+
+    runs-on: ubuntu-latest
+
+    if: github.event.ref == github.event.master_branch
+
+    steps:
+      - name: Disable this workflow
+        shell: bash
+        run: |
+          gh workflow disable -R $GITHUB_REPOSITORY "${{ github.workflow }}"
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
   initial-version:
 
     name: Set Inital Version
