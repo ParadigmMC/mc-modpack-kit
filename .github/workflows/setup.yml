@@ -11,6 +11,9 @@ jobs:
 
     if: github.event.ref == github.event.master_branch
 
+    permissions:
+      actions: write
+
     steps:
       - name: Disable this workflow
         shell: bash
