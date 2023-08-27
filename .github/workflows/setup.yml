@@ -15,7 +15,7 @@ jobs:
       - name: Disable this workflow
         shell: bash
         run: |
-          gh workflow disable -R $GITHUB_REPOSITORY "${{ github.workflow }}"
+          gh workflow disable -R ${{ github.repository }} "${{ github.workflow }}"
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
