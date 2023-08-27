@@ -46,7 +46,7 @@ jobs:
           commit_options: '--allow-empty'
           skip_dirty_check: true
           commit_message: |
-            chore(${{ inputs.modpack }}): release ${{ inputs.release-tag }}
+            chore(main): release ${{ inputs.release-tag }}
             Release-As: ${{ inputs.release-tag }}}
 
       - name: Print the Warning
