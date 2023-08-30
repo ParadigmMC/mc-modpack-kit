@@ -29,7 +29,7 @@ runs:
     - name: Parse the pack.toml
       id: parse
       run: |
-        loaders=("fabric" "forge" "quilt")
+        loaders=("fabric" "forge" "quilt" "neoforge")
         for loader in "${loaders[@]}"; do
           if [[ $(<"${{ env.pack-file }}") == *"$loader ="* ]]; then
             LOADER="$loader" && break
