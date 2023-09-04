@@ -94,6 +94,7 @@ runs:
           game-versions: ${{ env.game-version }}
           changelog-file: CHANGELOG.release.*
           files: "*.mrpack"
+          version: ${{ steps.tag.outputs.tag }}
           version-type: ${{ steps.release-type.outputs.release-type }}
 
       - name: Print Modrinth upload status
@@ -113,6 +114,7 @@ runs:
           game-versions: ${{ env.game-version }}
           changelog-file: CHANGELOG.release.*
           files: "*.zip"
+          version: ${{ steps.tag.outputs.tag }}
           version-type: ${{ steps.release-type.outputs.release-type }}
 
       - name: Print Curseforge upload status
