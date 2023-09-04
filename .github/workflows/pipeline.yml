@@ -28,7 +28,7 @@ jobs:
     steps:
 
       - name: Check Out Git Repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
 
       - name: List Modpacks
@@ -89,7 +89,7 @@ jobs:
           prerelease: true
 
       - name: Check Out Git Repository
-        uses: actions/checkout@v3.0.2
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
