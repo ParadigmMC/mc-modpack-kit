@@ -90,8 +90,8 @@ jobs:
           changelog-types: > 
             [{"type":"feat","section":"★ Features","hidden":false},
             {"type":"fix","section":"♻ Bug Fixes","hidden":false},
-            {"type":"mod","section":"⚡ Modpack Changes","hidden":false},
-            {"type":"update","section":"☄ Modpack Updates","hidden":false},
+            {"type":"mod","section":"☀ Modpack Changes","hidden":false},
+            {"type":"update","section":"⚘ Modpack Updates","hidden":false},
             {"type":"chore","section":"⚙️ Miscellaneous","hidden":true}]
 
       - name: Check Out Git Repository
