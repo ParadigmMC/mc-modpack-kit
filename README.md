@@ -14,6 +14,9 @@
 
 ---
 
+> [!IMPORTANT]
+> The repo has just moved from using just `feat`, `fix` and `chore` to using `feat`, `fix`, `chore`, `mod` and `update`!
+
 **mc-modpack-kit** is a GitHub Actions workflow template designed to simplify the release process of Minecraft modpacks using a structured monorepo approach. It automates essential tasks such as versioning, modpack building, and publishing on platforms like Modrinth and CurseForge.
 
 ### Key Features
@@ -33,10 +36,12 @@
    Experience effortless version control with Release Please, which generates changelogs and handles version releases automatically, in sync with your pull requests. Maintain clarity with Conventional Commit Messages.
 
    Examples:
-   - `chore(<modpack dir>): update <mod>` for mod updates.
-   - `feat(<modpack dir>): add <mod>` for adding a mod.
-
-3. **Mod Updates**
+    - `feat(modpack/<mod>): <description>` for adding new features, configurations or content.
+    - `chore(modpack/<mod>): <description>` for routine maintenance tasks or cleanups.
+    - `update(modpack/<mod>): update <mod>` for updating mods to newer versions.
+    - `mod(modpack/<mod>): add <mod>` for introducing new mods to the modpack.
+       
+4. **Mod Updates**
 
    Update your mods effortlessly by utilizing the `update.yml` workflow located in `.github/workflows/update.yml`. This action efficiently updates all mods across all subdirectories.
 
