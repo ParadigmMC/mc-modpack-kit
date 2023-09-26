@@ -15,7 +15,7 @@
 ---
 
 > [!IMPORTANT]
-> The repo has just moved from using just `chore` and `feat` to using `feat`, `chore`, `mod` and `update`!
+> The repo has just moved from using just `feat`, `fix` and `chore` to using `feat`, `fix`, `chore`, `mod` and `update`!
 
 **mc-modpack-kit** is a GitHub Actions workflow template designed to simplify the release process of Minecraft modpacks using a structured monorepo approach. It automates essential tasks such as versioning, modpack building, and publishing on platforms like Modrinth and CurseForge.
 
