@@ -43,6 +43,7 @@ jobs:
         with:
           commit_options: '--allow-empty'
           skip_dirty_check: true
+          push_options: --force
           commit_message: |
             chore(${{ steps.branch.outputs.branch }}): release ${{ inputs.release-tag }}
             Release-As: ${{ inputs.release-tag }}}

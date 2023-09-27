@@ -28,4 +28,5 @@ runs:
     - name: Push the Updated Version
       uses: stefanzweifel/git-auto-commit-action@v4
       with:
+        push_options: --force
         commit_message: "chore(${{ inputs.modpack }}): bump version to ${{ inputs.release-tag }}"
