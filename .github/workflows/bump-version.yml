@@ -20,13 +20,7 @@ on:
         required: false
         default: '1.0.0'
         type: string
-      modpack:
-        description: 'Path to the modpack directory'
-        required: false
-        default: 'main'
-        type: string
-
-
+      
 jobs:
   set-version:
     runs-on: ubuntu-latest
@@ -52,8 +46,3 @@ jobs:
           commit_message: |
             chore(${{ steps.branch.outputs.branch }}): release ${{ inputs.release-tag }}
             Release-As: ${{ inputs.release-tag }}}
-
-      - name: Print the Warning
-        run: |
-          echo "::warning ::⚠ The current release PR will update next push due to the GitHub Actions Token limitations!"
-        shell: bash
