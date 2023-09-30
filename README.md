@@ -16,6 +16,7 @@
 
 > [!IMPORTANT]
 > The repo has just moved from using just `feat`, `fix` and `chore` to using `feat`, `fix`, `chore`, `mod` and `update`!
+
 > [!IMPORTANT]
 > If you want to add branch protection rules, please allow force pushes currently for mc-modpack-kit/GitHub Actions!
 
