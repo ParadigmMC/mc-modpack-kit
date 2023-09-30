@@ -155,6 +155,8 @@ jobs:
           upload-curse: ${{ steps.set-mod-vendors.outputs.curseforge }}
           MODRINTH_ID: ${{ secrets.MODRINTH_ID }}
           MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
+          CURSEFORGE_ID: ${{ secrets.CURSEFORGE_ID }}
+          CURSEFORGE_TOKEN: ${{ secrets.CURSEFORGE_TOKEN }}
         if: |
           steps.release-please.outputs.releases_created &&
           (steps.set-mod-vendors.outputs.modrinth || steps.set-mod-vendors.outputs.curseforge)
