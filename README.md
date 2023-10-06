@@ -16,6 +16,7 @@
 
 > [!WARNING]
 > This currently does **not** support protected branches due to `github_token` limitations, this is being worked on :3
+
 > [!IMPORTANT]
 > The repo has just moved from using just `feat`, `fix` and `chore` to using `feat`, `fix`, `chore`, `mod` and `update`!
 
