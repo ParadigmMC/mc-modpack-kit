@@ -13,9 +13,6 @@ inputs:
   upload-curse:
     description: "Should the Modpack Be Uploaded to CurseForge"
     required: true
-  tag:
-    description: "Tag for the description"
-    required: true
 
   MODRINTH_TOKEN:
     required: false
@@ -35,6 +32,10 @@ inputs:
     required: false
     default: .
 
+  release-tag:
+    description: "Tag for the description"
+    required: true
+
 
 runs:
     using: "composite"
@@ -50,7 +51,7 @@ runs:
         id: download-files
         with:
           fileName: "*"
-          tag: ${{ inputs.tag }}
+          tag: ${{ inputs.release-tag }}
           tarBall: false
           zipBall: false
 
@@ -62,7 +63,7 @@ runs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
         with:
-          tag: ${{ inputs.tag }}
+          tag: ${{ inputs.release-tag }}
 
 
       # --- Set publish version-type
@@ -105,7 +106,7 @@ runs:
           game-versions: ${{ inputs.game-version }}
           changelog-file: CHANGELOG.release.*
           files: "*.mrpack"
-          version: ${{ inputs.tag }}
+          version: ${{ inputs.release-tag }}
           version-type: ${{ steps.release-type.outputs.release-type }}
 
       - name: Print Modrinth upload status
@@ -127,7 +128,7 @@ runs:
           game-versions: ${{ inputs.game-version }}
           changelog-file: CHANGELOG.release.*
           files: "*.zip"
-          version: ${{ inputs.tag }}
+          version: ${{ inputs.release-tag }}
           version-type: ${{ steps.release-type.outputs.release-type }}
 
       - name: Print Curseforge upload status

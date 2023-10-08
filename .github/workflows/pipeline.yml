@@ -171,6 +171,7 @@ jobs:
         uses: ./.github/actions/release
         with:
           modpack: ${{ matrix.modpack }}
+          release-tag: ${{ steps.tag.outputs.tag }}
           loader: ${{ steps.parse.outputs.loader }}
           game-version: ${{ steps.parse.outputs.game-version }}
           upload-modrinth: ${{ steps.set-mod-vendors.outputs.modrinth }}
