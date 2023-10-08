@@ -19,12 +19,16 @@ runs:
   using: "composite"
   
   steps:
+
+    # --- Checkout the repo
     - name: Check Out Git Repository
       uses: actions/checkout@v3
       with:
         fetch-depth: 0
         ref: 'main'
 
+
+    # --- Install Packwiz
     - name: Install packwiz
       uses: supplypike/setup-bin@v3
       with:
@@ -32,6 +36,8 @@ runs:
         name: "packwiz"
         version: "linux"
 
+
+    # --- Build Modrinth Pack If Wanted
     - name: Build Modrinth Modpack
       if: inputs.build-modrinth == 'true'
       run: |
@@ -40,6 +46,8 @@ runs:
       shell: bash
       working-directory: ${{ inputs.modpack }}
 
+
+     # --- Build Curseforge Pack If Wanted
     - name: Build CurseForge Modpack
       if: inputs.build-curse == 'true'
       run: |
@@ -47,6 +55,9 @@ runs:
         echo "::notice ::⚙ Modpack ${{ inputs.modpack }} has been exported as .zip"
       shell: bash
       working-directory: ${{ inputs.modpack }}
+
+
+    # --- Upload the pack/s to releases
 
     - name: Upload Modrinth Modpack to GitHub Releases
       if: inputs.build-modrinth == 'true'

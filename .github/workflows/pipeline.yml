@@ -27,10 +27,13 @@ jobs:
     
     steps:
 
+      # -- Checkout repo
       - name: Check Out Git Repository
         uses: actions/checkout@v4
 
 
+      # --- Parse the modpacks to and list
+      # This just parses the folders that have pack.toml
       - name: List Modpacks
         id: list_modpacks
         run: |
@@ -45,6 +48,8 @@ jobs:
           
           echo "modpack_folders=$(jq --compact-output --null-input '$ARGS.positional' --args -- "${modpackFolders[@]}")" >> "$GITHUB_OUTPUT"
 
+
+      # --- Print an nice msg about parsing
       - name: Current detected modpacks
         run: |
           echo "::notice ::⚙ Current detected modpacks: ${{ steps.list_modpacks.outputs.modpack_folders }}"
@@ -77,7 +82,7 @@ jobs:
     steps:      
 
       # --- Release please
-
+      # Creates and manages the prs and releases
       - name: Perform Release with Release Please
         id: release-please
         uses: google-github-actions/release-please-action@v3
@@ -94,38 +99,54 @@ jobs:
             {"type":"update","section":"⚘ Modpack Updates","hidden":false},
             {"type":"chore","section":"⛭ Miscellaneous","hidden":true}]
 
+
+      # --- Parse version from PR Title when creating PR's
+      # Had to do this cause like to bump on the release pleae branch
+      # The tests for the shitty Regex can be found here: https://regexr.com/7lb8e
+      - name: Parse tag from PR title
+        uses: actions-ecosystem/action-regex-match@v2
+        id: version
+        with:
+          text: ${{ fromJson(steps.release-please.outputs.pr).title }}
+          regex: '(?<=\s)(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?$'
+        if: ${{ steps.release-please.outputs.pr != '' }}
+
+
+      # --- Checkout the git repo
+      # Remembed to do this AFTER release please
       - name: Check Out Git Repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
 
-      # --- Bump pack.toml version
-      # Get Latest tag
-      # TODO: Change to release please tag
+      # --- Bump version
+      # Now we should use the parsed release to bump the version on the files on the release please branch
+      - name: Bump Version
+        uses: ./.github/actions/bump-pack
+        with:
+          release-tag: ${{ steps.version.outputs.match }}
+          modpack: ${{ matrix.modpack }}
+          branch: ${{ fromJson(steps.release-please.outputs.pr).headBranchName }}
+        if: ${{ steps.release-please.outputs.pr != '' }}
+
+
+      # --- Get latest tag
+      # Should probably be switched to use the release please tag but whatever
       - name: Get Latest tag
         id: tag
         uses: WyriHaximus/github-action-get-previous-tag@v1
         if: ${{ steps.release-please.outputs.releases_created }}
 
-      - name: Bump version
-        uses: ./.github/actions/bump-pack
-        with:
-          release-tag: ${{ steps.tag.outputs.tag }}
-          modpack: ${{ matrix.modpack }}
-        if: ${{ steps.release-please.outputs.releases_created }}
-
-
       # --- Handle the configs
-
-      - name: Parse pack file
+      - name: Parse Pack File
         id: parse
         uses: ./.github/actions/parse
         with:
           modpack: ${{ matrix.modpack }}
         if: ${{ steps.release-please.outputs.releases_created }}
 
-      - name: Set mod vendors
+      - name: Set Mod Vendors
         id: set-mod-vendors
         run: |
           [[ ! -z "${{ secrets.CURSEFORGE_TOKEN }}" && ! -z "${{ secrets.CURSEFORGE_ID }}" ]] && echo "curseforge=true" >> $GITHUB_OUTPUT || echo "curseforge=false" >> $GITHUB_OUTPUT
@@ -135,8 +156,7 @@ jobs:
 
 
       # --- Build an release
-
-      - name: Build modpack
+      - name: Build Modpack
         uses: ./.github/actions/build
         with:
           modpack: ${{ matrix.modpack }}
@@ -145,7 +165,9 @@ jobs:
           build-curse: ${{ env.default-release-curseforge }}
         if: ${{ steps.release-please.outputs.releases_created }}
 
-      - name: Release modpack to vendors
+
+      # --- Release
+      - name: Release Modpack to Vendors
         uses: ./.github/actions/release
         with:
           modpack: ${{ matrix.modpack }}
