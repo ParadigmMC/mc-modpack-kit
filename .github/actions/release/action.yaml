@@ -20,10 +20,10 @@ inputs:
   MODRINTH_ID:
     required: false
     description: "ID used to uploading modpack to Modrinth"
-  CURSEFORGE-TOKEN:
+  CURSEFORGE_TOKEN:
     required: false
     description: "Token used to uploading modpack to Curseforge"
-  CURSEFORGE-ID:
+  CURSEFORGE_ID:
     required: false
     description: "ID used to uploading modpack to Curseforge"
 
