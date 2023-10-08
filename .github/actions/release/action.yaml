@@ -32,6 +32,10 @@ inputs:
     required: false
     default: .
 
+  release-tag:
+    description: "Tag for the description"
+    required: true
+
 
 runs:
     using: "composite"
@@ -41,21 +45,13 @@ runs:
       - name: Check Out Git Repository
         uses: actions/checkout@v3
 
-
-      # --- Get latest tag
-      # TODO: Should probably be switched to an input
-      - name: Get Latest tag
-        id: tag
-        uses: WyriHaximus/github-action-get-previous-tag@v1
-
-
       # --- Download the pack files
       - name: Download the pack files
         uses: robinraju/release-downloader@v1.8
         id: download-files
         with:
           fileName: "*"
-          tag: ${{ steps.tag.outputs.tag }}
+          tag: ${{ inputs.release-tag }}
           tarBall: false
           zipBall: false
 
@@ -67,7 +63,7 @@ runs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
         with:
-          tag: ${{ steps.tag.outputs.tag }}
+          tag: ${{ inputs.release-tag }}
 
 
       # --- Set publish version-type
@@ -110,7 +106,7 @@ runs:
           game-versions: ${{ env.game-version }}
           changelog-file: CHANGELOG.release.*
           files: "*.mrpack"
-          version: ${{ steps.tag.outputs.tag }}
+          version: ${{ inputs.release-tag }}
           version-type: ${{ steps.release-type.outputs.release-type }}
 
       - name: Print Modrinth upload status
@@ -132,7 +128,7 @@ runs:
           game-versions: ${{ env.game-version }}
           changelog-file: CHANGELOG.release.*
           files: "*.zip"
-          version: ${{ steps.tag.outputs.tag }}
+          version: ${{ inputs.release-tag }}
           version-type: ${{ steps.release-type.outputs.release-type }}
 
       - name: Print Curseforge upload status

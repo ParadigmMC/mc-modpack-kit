@@ -14,12 +14,6 @@
 
 ---
 
-> [!WARNING]
-> This currently does **not** support protected branches due to `github_token` limitations, this is being worked on :3
-
-> [!IMPORTANT]
-> The repo has just moved from using just `feat`, `fix` and `chore` to using `feat`, `fix`, `chore`, `mod` and `update`!
-
 **mc-modpack-kit** is a GitHub Actions workflow template designed to simplify the release process of Minecraft modpacks using a structured monorepo approach. It automates essential tasks such as versioning, modpack building, and publishing on platforms like Modrinth and CurseForge.
 
 ### Key Features
