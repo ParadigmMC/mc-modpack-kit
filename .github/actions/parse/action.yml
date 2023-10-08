@@ -36,14 +36,14 @@ runs:
       run: |
         loaders=("fabric" "forge" "quilt" "neoforge")
         for loader in "${loaders[@]}"; do
-          if [[ $(<"${{ env.pack-file }}") == *"$loader ="* ]]; then
+          if [[ $(<"${{ inputs.pack-file }}") == *"$loader ="* ]]; then
             LOADER="$loader" && break
           fi
         done
 
-        [[ -z "$LOADER" ]] && { echo "::error file=${{ env.pack-file }}::No match found for loaders in ${{ env.pack-file }}" && exit 1; }
+        [[ -z "$LOADER" ]] && { echo "::error file=${{ inputs.pack-file }}::No match found for loaders in ${{ inputs.pack-file }}" && exit 1; }
 
-        GAME_VERSION=$(grep -oP 'minecraft = "\K[^"]+' "${{ env.pack-file }}")
+        GAME_VERSION=$(grep -oP 'minecraft = "\K[^"]+' "${{ inputs.pack-file }}")
         echo "loader=$LOADER" >> $GITHUB_ENV
         echo "game-version=$GAME_VERSION" >> $GITHUB_ENV
 

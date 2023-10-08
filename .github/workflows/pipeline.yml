@@ -23,7 +23,7 @@ jobs:
 
 
     outputs:
-      modpack_folders: ${{ steps.list_modpacks.outputs.modpack_folders }}
+      modpack-folders: ${{ steps.list-modpacks.outputs.modpack-folders }}
     
     steps:
 
@@ -35,36 +35,36 @@ jobs:
       # --- Parse the modpacks to and list
       # This just parses the folders that have pack.toml
       - name: List Modpacks
-        id: list_modpacks
+        id: list-modpacks
         run: |
           modpackFolders=()
           for folder in *; do
             if [ -d "$folder" ]; then
-              if [ -e "$folder/pack.toml" ]; then
+              if [ -e "$folder/${{ env.pack-file }}" ]; then
                 modpackFolders+=("$folder")
               fi
             fi
           done
           
-          echo "modpack_folders=$(jq --compact-output --null-input '$ARGS.positional' --args -- "${modpackFolders[@]}")" >> "$GITHUB_OUTPUT"
+          echo "modpack-folders=$(jq --compact-output --null-input '$ARGS.positional' --args -- "${modpackFolders[@]}")" >> "$GITHUB_OUTPUT"
 
 
       # --- Print an nice msg about parsing
       - name: Current detected modpacks
         run: |
-          echo "::notice ::⚙ Current detected modpacks: ${{ steps.list_modpacks.outputs.modpack_folders }}"
+          echo "::notice ::⚙ Current detected modpacks: ${{ steps.list-modpacks.outputs.modpack-folders }}"
 
   release-please:
 
     needs:
       - parse-current-modpacks
   
-    if: ${{ (needs.parse-current-modpacks.outputs.modpack_folders) != '[]' }}
+    if: ${{ (needs.parse-current-modpacks.outputs.modpack-folders) != '[]' }}
 
     strategy:
       fail-fast: false
       matrix:
-        modpack: ${{ fromJson(needs.parse-current-modpacks.outputs.modpack_folders) }}
+        modpack: ${{ fromJson(needs.parse-current-modpacks.outputs.modpack-folders) }}
 
     name: Handle Releases
 
