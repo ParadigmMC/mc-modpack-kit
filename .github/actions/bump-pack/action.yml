@@ -13,20 +13,31 @@ inputs:
     description: 'Path to the pack config file'
     required: false
     default: 'pack.toml'
+  branch:
+    description: "Branch, where to do the bump"
+    required: false
+    default: 'main'
 
 runs:
   using: 'composite'
   
   steps:
+
+    # --- Checkout with the named branch
     - name: Check Out Git Repository
       uses: actions/checkout@v3
+      with:
+        ref: ${{ inputs.branch }}
 
-    - name: Set the version
+
+    # --- Use sed to set the version
+    - name: Set the Version
       run: sed -i 's/version = "[^"]*"/version = "${{ inputs.release-tag }}"/' ${{ inputs.modpack }}/${{ inputs.pack-file }}
       shell: bash
 
-    - name: Push the Updated Version
+
+    # --- Push the version
+    - name: Push The Updated Version
       uses: stefanzweifel/git-auto-commit-action@v4
       with:
-        push_options: --force
         commit_message: "chore(${{ inputs.modpack }}): bump version to ${{ inputs.release-tag }}"

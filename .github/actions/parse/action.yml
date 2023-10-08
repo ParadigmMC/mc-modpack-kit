@@ -23,9 +23,14 @@ runs:
   using: 'composite'
 
   steps:
+
+    # --- Checkout repo
     - name: Check Out Git Repository
       uses: actions/checkout@v3
 
+
+    # --- Parse the pack.toml
+    # I am bored so sorry that I don't explain this, you should probably read the code?
     - name: Parse the pack.toml
       id: parse
       run: |
