@@ -109,6 +109,7 @@ runs:
           version: ${{ inputs.release-tag }}
           version-type: ${{ steps.release-type.outputs.release-type }}
 
+      # --- Print status
       - name: Print Modrinth upload status
         if: steps.modrinth.outcome == 'success'
         run: |
@@ -131,6 +132,7 @@ runs:
           version: ${{ inputs.release-tag }}
           version-type: ${{ steps.release-type.outputs.release-type }}
 
+      # --- Print status
       - name: Print Curseforge upload status
         if: steps.curseforge.outcome == 'success'
         run: |
