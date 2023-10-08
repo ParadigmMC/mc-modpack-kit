@@ -31,19 +31,22 @@ jobs:
       contents: write
 
     steps:
+      # --- Checkout the repo
       - name: Check Out Git Repository
         uses: actions/checkout@v4
 
+      # --- Get current branch
       - name: Get current branch
         id: branch
         run: echo "branch=${GITHUB_REF#refs/heads/}" >> $GITHUB_OUTPUT
 
+      # --- Set the new version
+      # TODO: Change to an pr
       - name: Set the New Version
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_options: '--allow-empty'
           skip_dirty_check: true
-          push_options: --force
           commit_message: |
             chore(${{ steps.branch.outputs.branch }}): release ${{ inputs.release-tag }}
             Release-As: ${{ inputs.release-tag }}}
