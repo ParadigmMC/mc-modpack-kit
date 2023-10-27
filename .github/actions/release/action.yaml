@@ -94,7 +94,6 @@ runs:
         shell: bash
         
 
-      # --- Publish to modrinth using the inputs
       - name: Publish to Modrinth
         id: modrinth
         if: inputs.upload-modrinth == 'true'
@@ -102,22 +101,19 @@ runs:
         with:
           modrinth-id: ${{ inputs.MODRINTH_ID }}
           modrinth-token: ${{ inputs.MODRINTH_TOKEN }}
-          loaders: ${{ inputs.loader }}
-          game-versions: ${{ inputs.game-version }}
+          loaders: ${{ env.loader }}
+          game-versions: ${{ env.game-version }}
           changelog-file: CHANGELOG.release.*
           files: "*.mrpack"
-          version: ${{ inputs.release-tag }}
+          version: ${{ steps.tag.outputs.tag }}
           version-type: ${{ steps.release-type.outputs.release-type }}
 
-      # --- Print status
       - name: Print Modrinth upload status
         if: steps.modrinth.outcome == 'success'
         run: |
           echo "::notice ::☀ Modpack ${{ inputs.modpack }} has been uploaded to Modrinth with ${{ inputs.MODRINTH_ID }}"
         shell: bash
 
-
-      # --- Publish to curseforge using the inputs
       - name: Publish to CurseForge
         id: curseforge
         if: inputs.upload-curse == 'true'
@@ -125,16 +121,16 @@ runs:
         with:
           curseforge-id: ${{ inputs.CURSEFORGE_ID }}
           curseforge-token: ${{ inputs.CURSEFORGE_TOKEN }}
-          loaders: ${{ inputs.loader }}
-          game-versions: ${{ inputs.game-version }}
+          loaders: ${{ env.loader }}
+          game-versions: ${{ env.game-version }}
           changelog-file: CHANGELOG.release.*
           files: "*.zip"
-          version: ${{ inputs.release-tag }}
+          version: ${{ steps.tag.outputs.tag }}
           version-type: ${{ steps.release-type.outputs.release-type }}
 
-      # --- Print status
       - name: Print Curseforge upload status
         if: steps.curseforge.outcome == 'success'
         run: |
           echo "::notice ::☀ Modpack ${{ inputs.modpack }} has been uploaded to Curseforge with ${{ inputs.CURSEFORGE_ID }}"
         shell: bash
+
