@@ -3,3 +3,9 @@
 
 # Exclude exported Modrinth modpacks
 *.mrpack
+
+# Exclude .direnv
+.direnv
+
+# Eclude precommit hooks config
+.pre-commit-config.yaml
