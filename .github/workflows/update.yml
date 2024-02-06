@@ -77,7 +77,7 @@ jobs:
         run: packwiz update -a -y
 
       - name: Push the updated mod list via a Pull Request
-        uses: peter-evans/create-pull-request@v5
+        uses: peter-evans/create-pull-request@v6
         with:
             commit-message: "update(${{ matrix.modpack }}): updated mods"
             title: 'update(${{ matrix.modpack }}): updated mods'
