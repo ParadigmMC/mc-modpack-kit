@@ -16,7 +16,7 @@
       systems = ["x86_64-linux"];
 
       imports = [
-        ./pre-commit-hooks.nix
+        inputs.pre-commit-hooks.flakeModule
       ];
 
       perSystem = {
@@ -24,15 +24,21 @@
         pkgs,
         ...
       }: {
+        pre-commit = {
+          check.enable = true;
+          settings.excludes = ["flake.lock"];
+          settings.hooks = {
+            alejandra.enable = true;
+            deadnix.enable = true;
+            prettier.enable = true;
+            markdownlint.enable = true;
+          };
+        };
         devShells.default = pkgs.mkShell {
           packages = [
-            pkgs.alejandra
             pkgs.git
             pkgs.packwiz
-            pkgs.yamllint
           ];
-          name = "mc-modpack-kit";
-          DIRENV_LOG_FORMAT = "";
           shellHook = ''
             ${config.pre-commit.installationScript}
           '';
