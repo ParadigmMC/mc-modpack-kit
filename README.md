@@ -6,8 +6,7 @@
 
 <p align="center">
   <a href="https://github.com/badges/shields/generate">
-    <img src="https://img.shields.io/badge/use%20this-template-blue?logo=github&style=for-the-badge" alt="Use this template">
-  </a>
+    <img src="https://img.shields.io/badge/use%20this-template-blue?logo=github&style=for-the-badge" alt="Use this template"></a>
   <img src="https://img.shields.io/badge/GitHub%20Actions-2088FF?logo=githubactions&logoColor=fff&style=for-the-badge" alt="GitHub Actions Badge">
   <img src="https://img.shields.io/badge/Minecraft-62B47A?logo=minecraft&logoColor=fff&style=for-the-badge" alt="Minecraft Badge">
 </p>
