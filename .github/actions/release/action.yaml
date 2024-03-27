@@ -41,11 +41,9 @@ runs:
     using: "composite"
     steps:
 
-      # --- Checkout the repo
       - name: Check Out Git Repository
         uses: actions/checkout@v3
 
-      # --- Download the pack files
       - name: Download the pack files
         uses: robinraju/release-downloader@v1.8
         id: download-files
@@ -55,8 +53,6 @@ runs:
           tarBall: false
           zipBall: false
 
-
-      # --- Get latest release description
       - name: Get latest release description
         uses: cardinalby/git-get-release-action@v1
         id: latest-release
@@ -65,8 +61,6 @@ runs:
         with:
           tag: ${{ inputs.release-tag }}
 
-
-      # --- Set publish version-type
       - name: Set publish version-type
         id: release-type
         run: |
@@ -80,13 +74,11 @@ runs:
         shell: bash
 
 
-      # --- Pipe latest release description to file
       - name: Pipe latest release description to file
         run: echo "${{ steps.latest-release.outputs.body }}" > CHANGELOG.release.md
         shell: bash
 
 
-      # --- Print status
       - name: Print status
         run: |
           echo "::notice ::⚙ Assets from latest release ${{ steps.latest-release.outputs.tag_name }} downloaded successfully!"

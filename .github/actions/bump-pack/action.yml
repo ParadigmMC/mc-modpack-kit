@@ -23,20 +23,17 @@ runs:
   
   steps:
 
-    # --- Checkout with the named branch
     - name: Check Out Git Repository
       uses: actions/checkout@v3
       with:
         ref: ${{ inputs.branch }}
 
 
-    # --- Use sed to set the version
     - name: Set the Version
       run: sed -i 's/version = "[^"]*"/version = "${{ inputs.release-tag }}"/' ${{ inputs.modpack }}/${{ inputs.pack-file }}
       shell: bash
 
 
-    # --- Push the version
     - name: Push The Updated Version
       uses: stefanzweifel/git-auto-commit-action@v4
       with:

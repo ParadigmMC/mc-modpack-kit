@@ -20,24 +20,15 @@ runs:
   
   steps:
 
-    # --- Checkout the repo
     - name: Check Out Git Repository
       uses: actions/checkout@v3
       with:
         fetch-depth: 0
         ref: 'main'
 
+    - name: Install nix and packwiz with it
+      uses: aldoborrero/use-nix-action@v4
 
-    # --- Install Packwiz
-    - name: Install packwiz
-      uses: supplypike/setup-bin@v3
-      with:
-        uri: "https://nightly.link/packwiz/packwiz/workflows/go/main/Linux%2064-bit%20x86.zip"
-        name: "packwiz"
-        version: "linux"
-
-
-    # --- Build Modrinth Pack If Wanted
     - name: Build Modrinth Modpack
       if: inputs.build-modrinth == 'true'
       run: |
@@ -46,8 +37,6 @@ runs:
       shell: bash
       working-directory: ${{ inputs.modpack }}
 
-
-     # --- Build Curseforge Pack If Wanted
     - name: Build CurseForge Modpack
       if: inputs.build-curse == 'true'
       run: |
@@ -56,8 +45,6 @@ runs:
       shell: bash
       working-directory: ${{ inputs.modpack }}
 
-
-    # --- Upload the pack/s to releases
 
     - name: Upload Modrinth Modpack to GitHub Releases
       if: inputs.build-modrinth == 'true'

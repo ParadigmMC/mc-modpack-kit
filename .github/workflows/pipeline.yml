@@ -27,13 +27,9 @@ jobs:
     
     steps:
 
-      # -- Checkout repo
       - name: Check Out Git Repository
         uses: actions/checkout@v4
 
-
-      # --- Parse the modpacks to and list
-      # This just parses the folders that have pack.toml
       - name: List Modpacks
         id: list-modpacks
         run: |
@@ -49,7 +45,6 @@ jobs:
           echo "modpack-folders=$(jq --compact-output --null-input '$ARGS.positional' --args -- "${modpackFolders[@]}")" >> "$GITHUB_OUTPUT"
 
 
-      # --- Print an nice msg about parsing
       - name: Current detected modpacks
         run: |
           echo "::notice ::⚙ Current detected modpacks: ${{ steps.list-modpacks.outputs.modpack-folders }}"
@@ -81,8 +76,6 @@ jobs:
 
     steps:      
 
-      # --- Release please
-      # Creates and manages the prs and releases
       - name: Perform Release with Release Please
         id: release-please
         uses: google-github-actions/release-please-action@v4
@@ -100,9 +93,6 @@ jobs:
             {"type":"chore","section":"⛭ Miscellaneous","hidden":true}]
 
 
-      # --- Parse version from PR Title when creating PR's
-      # Had to do this cause like to bump on the release pleae branch
-      # The tests for the shitty Regex can be found here: https://regexr.com/7lb8e
       - name: Parse tag from PR title
         uses: actions-ecosystem/action-regex-match@v2
         id: version
@@ -112,16 +102,12 @@ jobs:
         if: ${{ steps.release-please.outputs.pr != '' }}
 
 
-      # --- Checkout the git repo
-      # Remembed to do this AFTER release please
       - name: Check Out Git Repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
 
-      # --- Bump version
-      # Now we should use the parsed release to bump the version on the files on the release please branch
       - name: Bump Version
         uses: ./.github/actions/bump-pack
         with:
@@ -131,14 +117,11 @@ jobs:
         if: ${{ steps.release-please.outputs.pr != '' }}
 
 
-      # --- Get latest tag
-      # Should probably be switched to use the release please tag but whatever
       - name: Get Latest tag
         id: tag
         uses: WyriHaximus/github-action-get-previous-tag@v1
         if: ${{ steps.release-please.outputs.releases_created }}
 
-      # --- Handle the configs
       - name: Parse Pack File
         id: parse
         uses: ./.github/actions/parse
@@ -155,7 +138,6 @@ jobs:
         if: ${{ steps.release-please.outputs.releases_created }}
 
 
-      # --- Build an release
       - name: Build Modpack
         uses: ./.github/actions/build
         with:
