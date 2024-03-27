@@ -29,12 +29,8 @@ runs:
 
 
     # --- Install Packwiz
-    - name: Install packwiz
-      uses: supplypike/setup-bin@v3
-      with:
-        uri: "https://nightly.link/packwiz/packwiz/workflows/go/main/Linux%2064-bit%20x86.zip"
-        name: "packwiz"
-        version: "linux"
+    - name: Install nix and packwiz with it
+      uses: aldoborrero/use-nix-action@v4
 
 
     # --- Build Modrinth Pack If Wanted
