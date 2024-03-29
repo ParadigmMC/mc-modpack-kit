@@ -26,8 +26,16 @@ runs:
         fetch-depth: 0
         ref: 'main'
 
-    - name: Install nix and packwiz with it
-      uses: aldoborrero/use-nix-action@v4
+    - name: Install nix
+      uses: cachix/install-nix-action@v22
+      with:
+        nix_path: nixpkgs=channel:nixos
+
+    - name: Install direnv with Nix
+      uses: aldoborrero/direnv-nix-action@v2
+      with:
+        use_nix_profile: true
+        nix_channel: nixpkgs
 
     - name: Build Modrinth Modpack
       if: inputs.build-modrinth == 'true'
