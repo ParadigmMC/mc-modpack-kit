@@ -66,11 +66,11 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Install nix and packwiz with it
-        uses: aldoborrero/use-nix-action@v4
+      - name: Install nix
+        uses: cachix/install-nix-action@v22
 
       - name: Update Mods with Packwiz
-        run: packwiz update -a -y
+        run: nix develop --command packwiz update -a -y
 
       - name: Push the updated mod list via a Pull Request
         uses: peter-evans/create-pull-request@v6
