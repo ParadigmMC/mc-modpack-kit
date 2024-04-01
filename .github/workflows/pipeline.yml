@@ -78,7 +78,7 @@ jobs:
 
       - name: Perform Release with Release Please
         id: release-please
-        uses: google-github-actions/release-please-action@v4
+        uses: google-github-actions/release-please-action@v3
         with:
           monorepo-tags: true
           path: ${{ matrix.modpack }}
