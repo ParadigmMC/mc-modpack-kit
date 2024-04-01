@@ -9,3 +9,6 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    ignore:
+      - dependency-name: "release-please-action"
+        versions: ["^3.x.x", "^4.x.x"]
