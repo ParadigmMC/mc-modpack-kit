@@ -11,4 +11,4 @@ updates:
       interval: "weekly"
     ignore:
       - dependency-name: "release-please-action"
-        versions: ["^3.x.x", "^4.x.x"]
+        update-types: ["version-update:semver-major"]
