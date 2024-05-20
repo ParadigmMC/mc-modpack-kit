@@ -67,7 +67,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install nix
-        uses: cachix/install-nix-action@v26
+        uses: cachix/install-nix-action@V27
 
       - name: Update Mods with Packwiz
         run: nix develop --command packwiz update -a -y
